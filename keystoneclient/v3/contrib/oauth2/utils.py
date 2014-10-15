@@ -12,5 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 
 OAUTH2_PATH = '/OS-OAUTH2'
+
+def get_oauth_token_from_body(body):
+    """Parse the URL response body to retrieve the access token
+
+    The response body is JSON
+    """
+    # TODO(garcianavalon) this seems to be unnecesary, refactor it
+    token = json.loads(body)
+    return token
