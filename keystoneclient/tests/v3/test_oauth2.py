@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import urllib
 import uuid
 import mock
@@ -171,6 +172,61 @@ class AuthorizationCodeTests(utils.TestCase):
                                             state=state)
 
         assert(isinstance(response_body,dict))
+        
+
+class AccessTokenTests(utils.TestCase):
+    def setUp(self):
+        super(AccessTokenTests, self).setUp()
+        self.manager = self.client.oauth2.access_tokens
+        self.model = access_tokens.AccessToken
+        self.path_prefix = 'OS-OAUTH2'
+
+    def test_create_access_token(self):
+        consumer_id = uuid.uuid4().hex
+        consumer_secret = uuid.uuid4().hex
+        redirect_uri = uuid.uuid4().hex
+        authorization_code = uuid.uuid4().hex
+
+        stub_body = {
+            'access_token': uuid.uuid4().hex,
+            'refresh_token': uuid.uuid4().hex,
+            'expires_in': 3600,
+            'scopes': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex
+            ],
+            'token_type': 'Bearer'
+        }
+        self.stub_url('POST', [self.path_prefix, 'access_token'],
+                      status_code=201, json=stub_body)
+
+        # Assert that the manager creates an access token object
+        access_token = self.manager.create(consumer_id=consumer_id, 
+                                        consumer_secret=consumer_secret,
+                                        authorization_code=authorization_code, 
+                                        redirect_uri=redirect_uri)
+
+        self.assertIsInstance(access_token, self.model)
+        self.assertIsNotNone(access_token.access_token)
+        self.assertIsNotNone(access_token.scopes)
+        self.assertIsNotNone(access_token.expires_in)
+
+        # Assert that the request was sent in the expected structure
+        expected_body = {
+            'token_request' : {
+                'grant_type':'authorization_code',
+                'code': authorization_code,
+                'redirect_uri':redirect_uri
+            }
+        }
+        self.assertRequestBodyIs(json=expected_body)
+
+        auth_string = consumer_id + ':' + consumer_secret
+        expected_auth = 'Basic ' + base64.b64encode(auth_string)
+        self.assertRequestHeaderEqual('Authorization', expected_auth)
+
+        
+
         
 
 
