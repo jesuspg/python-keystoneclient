@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import unicode_literals
+import json
 
 from keystoneclient import base
 from keystoneclient.v3.contrib.oauth2 import utils
@@ -34,12 +34,11 @@ class AccessTokenManager(base.CrudManager):
                redirect_uri):
         endpoint = utils.OAUTH2_PATH + '/access_token'
 
-        url = self.client.auth_url.rstrip("/") + endpoint
         headers, body = self._generate_json_request(consumer_id, consumer_secret, 
                                                     authorization_code, redirect_uri)
 
         resp, body = self.client.post(endpoint, headers=headers, body=body)
-        token = utils.get_oauth_token_from_body(resp.content)
+        token = json.loads(resp.content)
         return self.resource_class(self, token)
 
     def _generate_json_request(self, consumer_id, consumer_secret,

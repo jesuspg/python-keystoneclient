@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import urllib
 import uuid
 import mock
 import six
@@ -22,6 +23,8 @@ from keystoneclient.openstack.common import timeutils
 from keystoneclient.tests.v3 import client_fixtures
 from keystoneclient.tests.v3 import utils
 from keystoneclient.v3.contrib.oauth2 import auth
+from keystoneclient.v3.contrib.oauth2 import access_tokens
+from keystoneclient.v3.contrib.oauth2 import authorization_codes
 from keystoneclient.v3.contrib.oauth2 import consumers
 
 try:
@@ -32,8 +35,6 @@ except ImportError:
 
 
 class BaseTest(utils.TestCase):
-
-    
 
     def setUp(self):
         super(BaseTest, self).setUp()
@@ -95,6 +96,96 @@ class ConsumerTests(BaseTest, utils.CrudTests):
         self.assertEqual(self.DEFAULT_CLIENT_TYPE, consumer.client_type)
         #self.assertIsNotNone(consumer.id)
         self.assertIsNone(consumer.description)
+
+
+
+class AuthorizationCodeTests(BaseTest):
+
+
+    def setUp(self):
+        super(AuthorizationCodeTests, self).setUp()
+        self.model = authorization_codes.AuthorizationCode
+        self.manager = self.client.oauth2.authorization_codes
+        self.path_prefix = 'OS-OAUTH2'
+
+    def test_authorize(self):
+        stub_headers = {
+            'Location':'https://foo.com/welcome_back?code=somerandomstring&state=xyz'
+        }
+        self.stub_url('POST',
+                      [self.path_prefix, 'authorize',], 
+                      status_code=200,headers=stub_headers)
+
+        
+        user_id = uuid.uuid4().hex
+        consumer_id = uuid.uuid4().hex
+        scopes = [uuid.uuid4().hex]
+
+        # Assert the manager is returning the expected data
+        authorization_code = self.manager.authorize(
+                                        user=user_id, 
+                                        consumer=consumer_id, 
+                                        scopes=scopes)
+
+        self.assertIsNotNone(authorization_code.code)
+        self.assertIsNotNone(authorization_code.state)
+        self.assertIsNotNone(authorization_code.redirect_uri)
+
+        # Assert that the request was sent in the expected structure
+        expected_body = {
+            'user_auth': {
+                'client_id':consumer_id,
+                'user_id':user_id,
+                'scopes':scopes
+            }
+        }
+        self.assertRequestBodyIs(json=expected_body)
+
+    def test_request_authorization(self):
+        scope = [uuid.uuid4().hex]
+        consumer_id = uuid.uuid4().hex
+        redirect_uri = uuid.uuid4().hex
+        state = uuid.uuid4().hex
+
+        # NOTE(garcianavalon) we use a list of tuples to ensure param order
+        # in the query string
+        stub_credentials = [
+            ('response_type','code'),
+            ('client_id',consumer_id),
+            ('redirect_uri',redirect_uri),
+            ('scope',scope),
+            ('state',state)
+        ]
+        query_string = '?%s' %urllib.urlencode(stub_credentials)
+
+        # NOTE(garcianavalon) this JSON emulates the provider response body
+        # but it might not be up-to-date because it's changing continuosly
+        # during development to adjust to different needs that keep appearing.
+        # Only take it as mean to test that the request_authorization call
+        # returns a dict, to know more about the response body check the Keystone
+        # OAuth2 Extension documentation
+        stub_body = { 
+            'data': {
+                'consumer': {
+                    'id':consumer_id
+                },
+                'redirect_uri':redirect_uri,
+                'requested_scopes':scope
+            }
+        }
+
+        self.stub_url('GET', [self.path_prefix, 'authorize', query_string],
+                      status_code=201,json=stub_body)
+
+        # Assert the manager is returning a dict with the info from the server
+        response_body =  self.manager.request_authorization(
+                                            consumer=consumer_id,
+                                            redirect_uri=redirect_uri,
+                                            scope=scope,
+                                            state=state)
+
+        assert(isinstance(response_body,dict))
+        
 
 
 class AuthenticateWithOAuthTests(BaseTest):
