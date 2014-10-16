@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from keystoneclient.v3.contrib.oauth2 import access_tokens
+from keystoneclient.v3.contrib.oauth2 import authorization_codes
 from keystoneclient.v3.contrib.oauth2 import consumers
 
 # NOTE(garcianavalon): If followed the oauth1 solution here, I'm
@@ -32,9 +33,9 @@ def create_oauth_manager(self):
         return OAuthManager(self)
 class OAuthManager(object):
     def __init__(self, api):
-        #self.access_tokens = access_tokens.AccessTokenManager(api)
+        self.access_tokens = access_tokens.AccessTokenManager(api)
         self.consumers = consumers.ConsumerManager(api)
-        #self.request_tokens = request_tokens.RequestTokenManager(api)
+        self.authorization_codes = authorization_codes.AuthorizationCodeManager(api)
 
 class OAuthManagerOptionalImportProxy(object):
     """Act as a proxy manager in case oauthlib is no installed.
