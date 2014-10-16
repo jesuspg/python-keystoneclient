@@ -19,11 +19,6 @@ from six.moves.urllib import parse as urlparse
 from keystoneclient import base
 from keystoneclient.v3.contrib.oauth2 import utils
 
-try:
-    from oauthlib import oauth2
-except ImportError:
-    oauth2 = None
-
 
 class AuthorizationCode(base.Resource):
     """ TODO(garcianavalon)
@@ -110,5 +105,5 @@ class AuthorizationCodeManager(base.CrudManager):
         endpoint = self.base_url + '/authorize?%s' %query
 
         response, body = self.client.get(endpoint)
-        # TODO(garcianavalon) figure out the return. Do we need a separated manager?
+        # FIXME(garcianavalon) figure out the return. Do we need a separated manager?
         return json.loads(response.content)

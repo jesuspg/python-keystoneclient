@@ -12,10 +12,6 @@
 # limitations under the License.
 
 from keystoneclient.auth.identity import v3
-try:
-    from oauthlib import oauth2
-except ImportError:
-    oauth2 = None
 
 class OAuthMethod(v3.AuthMethod):
     _method_parameters = ['access_token']
@@ -28,9 +24,6 @@ class OAuthMethod(v3.AuthMethod):
         :param string access_secret: Access token secret.
         """
         super(OAuthMethod, self).__init__(**kwargs)
-        if oauth2 is None:
-            raise NotImplementedError('optional package oauthlib'
-        ' is not installed')
 
     def get_auth_data(self, session, auth, headers, **kwargs):
         # Build the data for our custom auth method. Check the OAuth2.0 keystone
