@@ -15,45 +15,13 @@ from keystoneclient.v3.contrib.oauth2 import access_tokens
 from keystoneclient.v3.contrib.oauth2 import authorization_codes
 from keystoneclient.v3.contrib.oauth2 import consumers
 
-# NOTE(garcianavalon): If followed the oauth1 solution here, I'm
-# leaving the original notes as reference and to understand why
 
 def create_oauth_manager(self):
-    
-    # NOTE(stevemar): Attempt to import the oauthlib package at this point.
-    try:
-        import oauthlib # noqa
-        # NOTE(stevemar): Return an object instead of raising an exception here,
-        # this will allow users to see an exception only when trying to access the
-        # oauth portions of client. Otherwise an exception would be raised
-        # when the client is created.
-    except ImportError:
-        return OAuthManagerOptionalImportProxy()
-    else:
+        # TODO(garcianavalon) this is no longer necesary, remove
         return OAuthManager(self)
+
 class OAuthManager(object):
     def __init__(self, api):
         self.access_tokens = access_tokens.AccessTokenManager(api)
         self.consumers = consumers.ConsumerManager(api)
         self.authorization_codes = authorization_codes.AuthorizationCodeManager(api)
-
-class OAuthManagerOptionalImportProxy(object):
-    """Act as a proxy manager in case oauthlib is no installed.
-    This class will only be created if oauthlib is not in the system,
-    trying to access any of the attributes in name (access_tokens,
-    consumers, request_tokens), will result in a NotImplementedError,
-    and a message.
-    >>> manager.access_tokens.blah
-    NotImplementedError: To use 'access_tokens' oauthlib must be installed
-    Otherwise, if trying to access an attribute other than the ones in name,
-    the manager will state that the attribute does not exist.
-    >>> manager.dne.blah
-    AttributeError: 'OAuthManagerOptionalImportProxy' object has no
-    attribute 'dne'
-    """
-    def __getattribute__(self, name):
-        if name in ('access_tokens', 'consumers', 'request_tokens'):
-            raise NotImplementedError(
-                'To use %r oauthlib must be installed' % name)
-        return super(OAuthManagerOptionalImportProxy,
-            self).__getattribute__(name)

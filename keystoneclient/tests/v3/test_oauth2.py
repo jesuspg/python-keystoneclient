@@ -27,22 +27,8 @@ from keystoneclient.v3.contrib.oauth2 import access_tokens
 from keystoneclient.v3.contrib.oauth2 import authorization_codes
 from keystoneclient.v3.contrib.oauth2 import consumers
 
-try:
-    import oauthlib
-    from oauthlib import oauth2
-except ImportError:
-    oauth2 = None
 
-
-class BaseTest(utils.TestCase):
-
-    def setUp(self):
-        super(BaseTest, self).setUp()
-        if oauth2 is None:
-            self.skipTest('oauthlib package not available')
-
-
-class ConsumerTests(BaseTest, utils.CrudTests):
+class ConsumerTests(utils.TestCase, utils.CrudTests):
 
     DEFAULT_REDIRECT_URIS = ['https://uri.com']
     DEFAULT_SCOPES = ['all_info']
@@ -99,7 +85,7 @@ class ConsumerTests(BaseTest, utils.CrudTests):
 
 
 
-class AuthorizationCodeTests(BaseTest):
+class AuthorizationCodeTests(utils.TestCase):
 
 
     def setUp(self):
@@ -188,11 +174,8 @@ class AuthorizationCodeTests(BaseTest):
         
 
 
-class AuthenticateWithOAuthTests(BaseTest):
-    def setUp(self):
-        super(AuthenticateWithOAuthTests, self).setUp()
-        if oauth2 is None:
-            self.skipTest('optional package oauthlib is not installed')
+class AuthenticateWithOAuthTests(utils.TestCase):
+
 
     def test_oauth_authenticate_success(self):
         access_token = uuid.uuid4().hex
@@ -210,14 +193,3 @@ class AuthenticateWithOAuthTests(BaseTest):
         s = session.Session(auth=a)
         t = s.get_token()
         self.assertEqual(self.TEST_TOKEN, t)
-
-
-class TestOAuthLibModule(utils.TestCase):
-
-    def test_no_oauthlib_installed(self):
-        with mock.patch.object(auth, 'oauth2', None):
-            self.assertRaises(NotImplementedError,
-                              auth.OAuth,
-                              self.TEST_URL,
-                              project_id=uuid.uuid4().hex,
-                              access_token=uuid.uuid4().hex)
