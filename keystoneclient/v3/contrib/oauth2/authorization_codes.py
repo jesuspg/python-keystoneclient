@@ -33,7 +33,7 @@ class AuthorizationCodeManager(base.CrudManager):
     key = 'authorization_code'
     base_url = utils.OAUTH2_PATH
 
-    def authorize(self, user, consumer, scopes):
+    def authorize(self, user, consumer, scopes, redirect=False):
         """Authorize a Consumer for certain scopes, getting an authorization code.
 
         The way the provider (Keystone) will return the code is in the header, as an
@@ -48,8 +48,11 @@ class AuthorizationCodeManager(base.CrudManager):
             will exchange the authorization code for an access token.
         :param scopes: a list of scopes. They are provided by the consumer
             in the authorization request
+        :param redirect: The Keystone OAuth2 extension returns an HTTP 302 to 
+            comply with RFC 6749 but in general we dont want the redirect to happen 
+            if we are using the keystoneclient.
         """
-
+        #import pdb; pdb.set_trace()
         endpoint = self.base_url + '/authorize'
         body = {
             'user_auth': {
@@ -58,7 +61,7 @@ class AuthorizationCodeManager(base.CrudManager):
                 'scopes':scopes
             }
         }
-        response, body = self.client.post(endpoint, body=body)
+        response, body = self.client.post(endpoint, body=body, redirect=redirect)
 
         redirect_uri = response.headers.get('Location')
 

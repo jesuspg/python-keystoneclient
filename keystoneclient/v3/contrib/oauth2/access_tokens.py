@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import json
 
 from keystoneclient import base
@@ -30,8 +31,9 @@ class AccessTokenManager(base.CrudManager):
 
         headers, body = self._generate_json_request(consumer_id, consumer_secret, 
                                                     authorization_code, redirect_uri)
-
-        resp, body = self.client.post(endpoint, headers=headers, body=body)
+        #import pdb; pdb.set_trace()
+        resp, body = self.client.post(endpoint,headers=headers, body=body)
+        import pdb; pdb.set_trace()
         token = json.loads(resp.content)
         return self.resource_class(self, token)
 
@@ -51,4 +53,4 @@ class AccessTokenManager(base.CrudManager):
 
     def _http_basic(self, consumer_id, consumer_secret):
         auth_string = consumer_id + ':' + consumer_secret
-        return 'Basic ' + auth_string.encode('base64')
+        return 'Basic ' + base64.b64encode(auth_string)
