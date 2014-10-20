@@ -13,17 +13,14 @@
 
 from keystoneclient.auth.identity import v3
 
-class OAuthMethod(v3.AuthMethod):
+class OAuth2Method(v3.AuthMethod):
     _method_parameters = ['access_token']
 
     def __init__(self, **kwargs):
         """Construct an OAuth based authentication method.
-        :param string consumer_key: Consumer key.
-        :param string consumer_secret: Consumer secret.
-        :param string access_key: Access token key.
-        :param string access_secret: Access token secret.
+        :param string access_token: Access token id.
         """
-        super(OAuthMethod, self).__init__(**kwargs)
+        super(OAuth2Method, self).__init__(**kwargs)
 
     def get_auth_data(self, session, auth, headers, **kwargs):
         # Build the data for our custom auth method. Check the OAuth2.0 keystone
@@ -35,5 +32,5 @@ class OAuthMethod(v3.AuthMethod):
         return name, auth_data
 
 
-class OAuth(v3.AuthConstructor):
-    _auth_method_class = OAuthMethod
+class OAuth2(v3.AuthConstructor):
+    _auth_method_class = OAuth2Method

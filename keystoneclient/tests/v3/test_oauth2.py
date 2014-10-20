@@ -175,6 +175,7 @@ class AuthorizationCodeTests(utils.TestCase):
         
 
 class AccessTokenTests(utils.TestCase):
+
     def setUp(self):
         super(AccessTokenTests, self).setUp()
         self.manager = self.client.oauth2.access_tokens
@@ -225,15 +226,42 @@ class AccessTokenTests(utils.TestCase):
         expected_auth = 'Basic ' + base64.b64encode(auth_string)
         self.assertRequestHeaderEqual('Authorization', expected_auth)
 
-        
-
-        
-
 
 class AuthenticateWithOAuthTests(utils.TestCase):
 
 
     def test_oauth_authenticate_success(self):
+        access_token = uuid.uuid4().hex
+
+        # Just use an existing project scoped token and change
+        # the methods to oauth2, and add its section.
+        oauth_token = client_fixtures.unscoped_token()
+
+        oauth_token['methods'] = ["oauth2"]
+        oauth_token['oauth2'] = {
+            "access_token_id": access_token
+        }
+        self.stub_auth(json=oauth_token)
+
+        a = auth.OAuth2(self.TEST_URL, access_token=access_token)
+        s = session.Session(auth=a)
+        t = s.get_token()
+        self.assertEqual(self.TEST_TOKEN, t)
+
+        OAUTH2_REQUEST_BODY = {
+            "auth": {
+                "identity": {
+                    "methods": ["oauth2"],
+                    "oauth2": {
+                        "access_token_id": access_token
+                    }
+                }
+            }
+        }
+
+        self.assertRequestBodyIs(json=OAUTH2_REQUEST_BODY)
+
+    def test_oauth_authenticate_scoped_success(self):
         access_token = uuid.uuid4().hex
 
         # Just use an existing project scoped token and change
@@ -245,7 +273,20 @@ class AuthenticateWithOAuthTests(utils.TestCase):
         }
         self.stub_auth(json=oauth_token)
 
-        a = auth.OAuth(self.TEST_URL, access_token=access_token)
+        a = auth.OAuth2(self.TEST_URL, access_token=access_token)
         s = session.Session(auth=a)
         t = s.get_token()
         self.assertEqual(self.TEST_TOKEN, t)
+
+        OAUTH2_REQUEST_BODY = {
+            "auth": {
+                "identity": {
+                    "methods": ["oauth2"],
+                    "oauth2": {
+                        "access_token_id": access_token
+                    }
+                }
+            }
+        }
+
+        self.assertRequestBodyIs(json=OAUTH2_REQUEST_BODY)
