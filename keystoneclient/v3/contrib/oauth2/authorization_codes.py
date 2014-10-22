@@ -52,7 +52,6 @@ class AuthorizationCodeManager(base.CrudManager):
             comply with RFC 6749 but in general we dont want the redirect to happen 
             if we are using the keystoneclient.
         """
-        #import pdb; pdb.set_trace()
         endpoint = self.base_url + '/authorize'
         body = {
             'user_auth': {
@@ -107,5 +106,5 @@ class AuthorizationCodeManager(base.CrudManager):
         endpoint = self.base_url + '/authorize?%s' %query
 
         response, body = self.client.get(endpoint)
-        # FIXME(garcianavalon) figure out the return. Do we need a separated manager?
+        # TODO(garcianavalon) figure out the return. Do we need a separated manager?
         return json.loads(response.content)

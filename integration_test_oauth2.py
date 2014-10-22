@@ -12,7 +12,6 @@ redirect_uri='https://testuri.com'
 scope='all_info'
 scopes=[scope]
 
-
 #create a consumer
 consumer = keystone.oauth2.consumers.create(client_type='confidential',
                                             redirect_uris=[redirect_uri],

@@ -107,6 +107,7 @@ class AuthorizationCodeTests(utils.TestCase):
         scopes = [uuid.uuid4().hex]
 
         # Assert the manager is returning the expected data
+
         authorization_code = self.manager.authorize( 
                                         consumer=consumer_id, 
                                         scopes=scopes)
@@ -171,6 +172,7 @@ class AuthorizationCodeTests(utils.TestCase):
         
 
 class AccessTokenTests(utils.TestCase):
+
 
     def setUp(self):
         super(AccessTokenTests, self).setUp()
@@ -258,6 +260,7 @@ class AuthenticateWithOAuthTests(utils.TestCase):
         self.assertRequestBodyIs(json=OAUTH2_REQUEST_BODY)
 
     def test_oauth_authenticate_scoped_success(self):
+
         access_token = uuid.uuid4().hex
 
         # Just use an existing project scoped token and change

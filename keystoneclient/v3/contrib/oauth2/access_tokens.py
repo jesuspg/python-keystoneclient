@@ -32,7 +32,8 @@ class AccessTokenManager(base.CrudManager):
         headers, body = self._generate_json_request(consumer_id, consumer_secret, 
                                                     authorization_code, redirect_uri)
 
-        resp, body = self.client.post(endpoint,headers=headers, body=body)
+        resp, body = self.client.post(endpoint, headers=headers, body=body)
+
         token = json.loads(resp.content)
         return self.resource_class(self, token)
 
