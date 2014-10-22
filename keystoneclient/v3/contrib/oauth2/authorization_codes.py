@@ -33,7 +33,7 @@ class AuthorizationCodeManager(base.CrudManager):
     key = 'authorization_code'
     base_url = utils.OAUTH2_PATH
 
-    def authorize(self, user, consumer, scopes, redirect=False):
+    def authorize(self, consumer, scopes, redirect=False):
         """Authorize a Consumer for certain scopes, getting an authorization code.
 
         The way the provider (Keystone) will return the code is in the header, as an
@@ -57,7 +57,6 @@ class AuthorizationCodeManager(base.CrudManager):
         body = {
             'user_auth': {
                 'client_id':base.getid(consumer),
-                'user_id':base.getid(user),
                 'scopes':scopes
             }
         }

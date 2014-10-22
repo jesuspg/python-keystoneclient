@@ -103,14 +103,11 @@ class AuthorizationCodeTests(utils.TestCase):
                       [self.path_prefix, 'authorize',], 
                       status_code=200,headers=stub_headers)
 
-        
-        user_id = uuid.uuid4().hex
         consumer_id = uuid.uuid4().hex
         scopes = [uuid.uuid4().hex]
 
         # Assert the manager is returning the expected data
-        authorization_code = self.manager.authorize(
-                                        user=user_id, 
+        authorization_code = self.manager.authorize( 
                                         consumer=consumer_id, 
                                         scopes=scopes)
 
@@ -122,7 +119,6 @@ class AuthorizationCodeTests(utils.TestCase):
         expected_body = {
             'user_auth': {
                 'client_id':consumer_id,
-                'user_id':user_id,
                 'scopes':scopes
             }
         }

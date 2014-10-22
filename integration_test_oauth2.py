@@ -3,13 +3,15 @@ from keystoneclient.v3 import client
 from keystoneclient import session
 from keystoneclient.v3.contrib.oauth2 import auth
 url = 'http://127.0.0.1:5000/v3'
-keystone = client.Client(token='ADMIN',endpoint=url)
+#keystone = client.Client(token='ADMIN',endpoint=url)
+
+keystone=client.Client(username='admin', password='secrete',
+                        project_name='demo', auth_url=url)
 
 redirect_uri='https://testuri.com'
 scope='all_info'
 scopes=[scope]
-admin_user = keystone.users.find(name='admin')
-user_id=admin_user.id
+
 
 #create a consumer
 consumer = keystone.oauth2.consumers.create(client_type='confidential',
@@ -24,7 +26,7 @@ keystone.oauth2.authorization_codes.request_authorization(consumer=consumer_id,
                                                         redirect_uri=redirect_uri, 
                                                         scope=scope)
 #grant authorization
-authorization_code = keystone.oauth2.authorization_codes.authorize(user=user_id, 
+authorization_code = keystone.oauth2.authorization_codes.authorize(
                                             consumer=consumer_id, 
                                             scopes=scopes)
 #get an access token
