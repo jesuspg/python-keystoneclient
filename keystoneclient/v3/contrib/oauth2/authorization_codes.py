@@ -92,17 +92,21 @@ class AuthorizationCodeManager(base.CrudManager):
             defined by the provider.
         :param state: Optional, a string for consumer use.
         """
+        # Transform the array with the requested scopes into a list of 
+        # space-delimited, case-sensitive strings as specified in RFC 6749
+        # http://tools.ietf.org/html/rfc6749#section-3.3
+        scope_string = ' '.join(scope)
         
         # NOTE(garcianavalon) we use a list of tuples to ensure param order
         # in the query string to be able to mock it during testing.
         credentials = [
-            ('response_type','code'),
-            ('client_id',base.getid(consumer)),
-            ('redirect_uri',redirect_uri),
-            ('scope',scope),
-            ('state',state)
+            ('response_type', 'code'),
+            ('client_id', base.getid(consumer)),
+            ('redirect_uri', redirect_uri),
+            ('scope', scope_string),
+            ('state', state)
         ]
-        query= urllib.urlencode(credentials)
+        query = urllib.urlencode(credentials)
         endpoint = self.base_url + '/authorize?%s' %query
 
         response, body = self.client.get(endpoint)

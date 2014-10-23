@@ -33,8 +33,8 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
 
     DEFAULT_REDIRECT_URIS = ['https://uri.com']
     DEFAULT_SCOPES = ['all_info']
-    DEFAULT_CLIENT_TYPE='confidential'
-    DEFAULT_GRANT_TYPE='authorization_code'
+    DEFAULT_CLIENT_TYPE = 'confidential'
+    DEFAULT_GRANT_TYPE = 'authorization_code'
 
     def setUp(self):
         super(ConsumerTests, self).setUp()
@@ -101,7 +101,7 @@ class AuthorizationCodeTests(utils.TestCase):
         }
         self.stub_url('POST',
                       [self.path_prefix, 'authorize',], 
-                      status_code=200,headers=stub_headers)
+                      status_code=200, headers=stub_headers)
 
         consumer_id = uuid.uuid4().hex
         scopes = [uuid.uuid4().hex]
@@ -131,14 +131,15 @@ class AuthorizationCodeTests(utils.TestCase):
         redirect_uri = uuid.uuid4().hex
         state = uuid.uuid4().hex
 
+        scope_string = ' '.join(scope)
         # NOTE(garcianavalon) we use a list of tuples to ensure param order
         # in the query string
         stub_credentials = [
-            ('response_type','code'),
-            ('client_id',consumer_id),
-            ('redirect_uri',redirect_uri),
-            ('scope',scope),
-            ('state',state)
+            ('response_type', 'code'),
+            ('client_id', consumer_id),
+            ('redirect_uri', redirect_uri),
+            ('scope', scope_string),
+            ('state', state)
         ]
         query_string = '?%s' %urllib.urlencode(stub_credentials)
 
@@ -159,16 +160,16 @@ class AuthorizationCodeTests(utils.TestCase):
         }
 
         self.stub_url('GET', [self.path_prefix, 'authorize', query_string],
-                      status_code=201,json=stub_body)
+                      status_code=201, json=stub_body)
 
         # Assert the manager is returning a dict with the info from the server
-        response_body =  self.manager.request_authorization(
+        response_body = self.manager.request_authorization(
                                             consumer=consumer_id,
                                             redirect_uri=redirect_uri,
                                             scope=scope,
                                             state=state)
 
-        assert(isinstance(response_body,dict))
+        assert(isinstance(response_body, dict))
         
 
 class AccessTokenTests(utils.TestCase):
