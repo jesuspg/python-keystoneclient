@@ -191,10 +191,7 @@ class AccessTokenTests(utils.TestCase):
             'access_token': uuid.uuid4().hex,
             'refresh_token': uuid.uuid4().hex,
             'expires_in': 3600,
-            'scopes': [
-                uuid.uuid4().hex,
-                uuid.uuid4().hex
-            ],
+            'scope': ' '.join([uuid.uuid4().hex, uuid.uuid4().hex]),
             'token_type': 'Bearer'
         }
         self.stub_url('POST', [self.path_prefix, 'access_token'],
@@ -208,7 +205,7 @@ class AccessTokenTests(utils.TestCase):
 
         self.assertIsInstance(access_token, self.model)
         self.assertIsNotNone(access_token.access_token)
-        self.assertIsNotNone(access_token.scopes)
+        self.assertIsNotNone(access_token.scope)
         self.assertIsNotNone(access_token.expires_in)
 
         # Assert that the request was sent in the expected structure
