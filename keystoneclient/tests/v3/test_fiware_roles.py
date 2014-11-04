@@ -43,7 +43,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         role_ref = self.new_ref()
         self.stub_url('PUT',
                       [self.path_prefix, self.collection_key, role_ref['id'], 
-                        'permissions'],
+                        'permissions', permission_id],
                       status_code=204)
 
         self.manager.add_permission(role=role_ref['id'], permission=permission_id)
