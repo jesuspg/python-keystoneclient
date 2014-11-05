@@ -54,7 +54,7 @@ class RoleManager(base.CrudManager):
         return self.put(append_to_url=endpoint,
                     role_id=base.getid(role))
 
-    def create(self, name=None, is_editable=True, application=None, **kwargs):
+    def create(self, name, is_editable=True, application=None, **kwargs):
         return super(RoleManager, self).create(
                                         name=name,
                                         is_editable=is_editable,

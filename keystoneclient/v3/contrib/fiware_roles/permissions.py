@@ -27,3 +27,26 @@ class PermissionManager(base.CrudManager):
     collection_key = 'permissions'
     key = 'permission'
     base_url = ROLES_PATH
+
+    def create(self, name, is_editable=True, application=None, **kwargs):
+        return super(PermissionManager, self).create(
+                                        name=name,
+                                        is_editable=is_editable,
+                                        application=application,
+                                        **kwargs)
+    def get(self, permission):
+        return super(PermissionManager, self).get(
+                                    permission_id=base.getid(permission))
+
+    def update(self, permission, name=None, is_editable=True, 
+                application=None, **kwargs):
+        return super(PermissionManager, self).update(
+                                        permission_id=base.getid(permission),
+                                        name=name,
+                                        is_editable=is_editable,
+                                        application=application,
+                                        **kwargs)
+        
+    def delete(self, permission):
+        return super(PermissionManager, self).delete(
+                            permission_id=base.getid(permission))

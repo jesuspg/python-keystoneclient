@@ -17,7 +17,7 @@ import uuid
 from keystoneclient import exceptions
 from keystoneclient.tests.v3 import utils
 from keystoneclient.v3.contrib.fiware_roles import roles
-
+from keystoneclient.v3.contrib.fiware_roles import permissions
 
 EXTENSION_PATH = 'OS-ROLES'
 
@@ -57,3 +57,20 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                           self.manager.add_permission,
                           role=None,
                           permission=permission_id)
+
+class PermissionTests(utils.TestCase, utils.CrudTests):
+
+
+    def setUp(self):
+        super(PermissionTests, self).setUp()
+        self.key = 'permission'
+        self.collection_key = 'permissions'
+        self.model = permissions.Permission
+        self.manager = self.client.fiware_roles.permissions
+        self.path_prefix = EXTENSION_PATH
+
+    def new_ref(self, **kwargs):
+        kwargs = super(PermissionTests, self).new_ref(**kwargs)
+        kwargs.setdefault('name', uuid.uuid4().hex)
+        kwargs.setdefault('is_editable', True)
+        return kwargs
