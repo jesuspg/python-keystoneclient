@@ -39,13 +39,13 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         return kwargs
 
     def test_add_permission_to_role(self):
+
         permission_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         self.stub_url('PUT',
                       [self.path_prefix, self.collection_key, role_ref['id'], 
                         'permissions', permission_id],
                       status_code=204)
-
         self.manager.add_permission(role=role_ref['id'], permission=permission_id)
 
         # Test invalid args
@@ -57,7 +57,3 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                           self.manager.add_permission,
                           role=None,
                           permission=permission_id)
-
-
-
-

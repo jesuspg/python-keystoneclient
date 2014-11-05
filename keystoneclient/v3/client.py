@@ -22,6 +22,7 @@ from keystoneclient import exceptions
 from keystoneclient import httpclient
 from keystoneclient.v3.contrib import endpoint_filter
 from keystoneclient.v3.contrib import endpoint_policy
+from keystoneclient.v3.contrib import fiware_roles
 from keystoneclient.v3.contrib import federation
 from keystoneclient.v3.contrib import oauth1
 from keystoneclient.v3.contrib import oauth2
@@ -178,6 +179,7 @@ EndpointPolicyManager`
         self.groups = groups.GroupManager(self)
         self.oauth1 = oauth1.create_oauth_manager(self)
         # TODO(garcianavalon) document this
+        self.fiware_roles = fiware_roles.FiwareRolesManager(self)
         self.oauth2 = oauth2.create_oauth_manager(self)
         self.policies = policies.PolicyManager(self)
         self.projects = projects.ProjectManager(self)

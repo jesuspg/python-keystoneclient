@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from keystoneclient import base
-from keystoneclient.v3.contrib.fiware_roles import core
+from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
 
 class Permission(base.Resource):
     pass
@@ -26,4 +26,4 @@ class PermissionManager(base.CrudManager):
     resource_class = Permission
     collection_key = 'permissions'
     key = 'permission'
-    base_url = core.ROLES_PATH
+    base_url = ROLES_PATH

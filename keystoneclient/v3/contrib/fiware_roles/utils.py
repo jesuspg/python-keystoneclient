@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keystoneclient.v3.contrib.fiware_roles.core import *
+ROLES_PATH = '/OS-ROLES'

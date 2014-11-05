@@ -15,9 +15,7 @@
 from keystoneclient.v3.contrib.fiware_roles import roles
 from keystoneclient.v3.contrib.fiware_roles import permissions
 
-ROLES_PATH = '/OS-ROLES'
-
-class OAuthManager(object):
-    def __init__(self, api):
-        self.roles = roles.RoleManager(api)
-        self.permissions = permissions.PermissionManager(api)
+class FiwareRolesManager(object):
+     def __init__(self, api):
+         self.roles = roles.RoleManager(api)
+         self.permissions = permissions.PermissionManager(api)
