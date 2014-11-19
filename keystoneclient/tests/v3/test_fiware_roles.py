@@ -38,25 +38,51 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         kwargs.setdefault('is_editable', True)
         return kwargs
 
-    def test_add_permission_to_role(self):
+    # def test_add_permission_to_role(self):
 
+    #     permission_id = uuid.uuid4().hex
+    #     role_ref = self.new_ref()
+    #     self.stub_url('PUT',
+    #                   [self.path_prefix, self.collection_key, role_ref['id'], 
+    #                     'permissions', permission_id],
+    #                   status_code=204)
+    #     self.manager.add_permission(role=role_ref['id'], permission=permission_id)
+
+    #     # Test invalid args
+    #     self.assertRaises(exceptions.ValidationError,
+    #                       self.manager.add_permission,
+    #                       role=role_ref['id'],
+    #                       permission=None)
+    #     self.assertRaises(exceptions.ValidationError,
+    #                       self.manager.add_permission,
+    #                       role=None,
+    #                       permission=permission_id)
+
+    def test_list_roles_by_permission(self):
         permission_id = uuid.uuid4().hex
-        role_ref = self.new_ref()
-        self.stub_url('PUT',
-                      [self.path_prefix, self.collection_key, role_ref['id'], 
-                        'permissions', permission_id],
-                      status_code=204)
-        self.manager.add_permission(role=role_ref['id'], permission=permission_id)
+        ref_list = [self.new_ref(), self.new_ref()]
 
-        # Test invalid args
-        self.assertRaises(exceptions.ValidationError,
-                          self.manager.add_permission,
-                          role=role_ref['id'],
-                          permission=None)
-        self.assertRaises(exceptions.ValidationError,
-                          self.manager.add_permission,
-                          role=None,
-                          permission=permission_id)
+        self.stub_entity('GET',
+                      parts=[self.path_prefix, 'permissions', permission_id, self.collection_key],
+                      entity=ref_list)
+
+        returned_list = self.manager.list(permission=permission_id)
+
+        self.assertEqual(len(ref_list), len(returned_list))
+        [self.assertIsInstance(r, self.model) for r in returned_list]
+
+    def test_list_roles_by_user(self):
+        user_id = uuid.uuid4().hex
+        ref_list = [self.new_ref(), self.new_ref()]
+
+        self.stub_entity('GET',
+                      parts=[self.path_prefix, 'users', user_id, self.collection_key],
+                      entity=ref_list)
+
+        returned_list = self.manager.list(user=user_id)
+
+        self.assertEqual(len(ref_list), len(returned_list))
+        [self.assertIsInstance(r, self.model) for r in returned_list]
 
 class PermissionTests(utils.TestCase, utils.CrudTests):
 
