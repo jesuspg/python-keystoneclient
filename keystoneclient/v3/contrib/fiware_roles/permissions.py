@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from keystoneclient import base
+from keystoneclient import exceptions
 from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
 
 class Permission(base.Resource):
@@ -75,7 +76,21 @@ class PermissionManager(base.CrudManager):
     #         base_url=base_url,
     #         permission_id=base.getid(permission))
 
-    def list(self, **kwargs):   
-        return super(PermissionManager, self).list(**kwargs)
+    def list(self, role=None, **kwargs):  
 
-  
+        if role:
+            base_url = self.base_url + '/roles/%s' % base.getid(role)
+
+        else:
+            base_url = self.base_url 
+        return super(PermissionManager, self).list(base_url=base_url,**kwargs)
+
+    def add_role(self, role, permission):
+        self._require_role_and_permission(role, permission)
+        base_url = self.base_url + '/roles/%s' % base.getid(role)
+
+        return super(PermissionManager, self).put(
+            base_url=base_url,
+            permission_id=base.getid(permission))
+
+    # def remove_role(self, role, permission):
