@@ -19,6 +19,7 @@ from keystoneclient.tests.v3 import utils
 from keystoneclient.v3.contrib.fiware_roles import roles
 from keystoneclient.v3.contrib.fiware_roles import permissions
 
+
 EXTENSION_PATH = 'OS-ROLES'
 
 class RoleTests(utils.TestCase, utils.CrudTests):
@@ -126,4 +127,23 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
                           role=None,
                           permission=permission_id)
 
+    def test_remove_permission_from_role(self):
+
+        permission_id = uuid.uuid4().hex
+        role_ref = self.new_ref()
+        self.stub_url('DELETE',
+                      [self.path_prefix, 'roles',role_ref['id'],
+                       self.collection_key, permission_id], 
+                      status_code=204)
+        self.manager.remove_role(role=role_ref['id'], permission=permission_id)
+
+        # Test invalid args
+        self.assertRaises(exceptions.ValidationError,
+                          self.manager.remove_role,
+                          role=role_ref['id'],
+                          permission=None)
+        self.assertRaises(exceptions.ValidationError,
+                          self.manager.remove_role,
+                          role=None,
+                          permission=permission_id)
 
