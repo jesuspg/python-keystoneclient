@@ -30,10 +30,15 @@ class RoleManager(base.CrudManager):
     key = 'role'
     base_url = ROLES_PATH
 
-    # def _require_role_and_permission(self, role, permission):
-    #     if not (role and permission):
-    #         msg = 'Specify both a role and a permission'
-    #         raise exceptions.ValidationError(msg)
+    def _require_role_and_permission(self, role, permission):
+        if not (role and permission):
+            msg = 'Specify both a role and a permission'
+            raise exceptions.ValidationError(msg)
+
+    def _require_role_and_user(self, role, user):
+        if not(role and user):
+            msg = 'Specify both a role and a user'
+            raise exceptions.ValidationError(msg)
 
     def _require_user_xor_permission(self, user, permission):
         if user and permission:
@@ -112,6 +117,38 @@ class RoleManager(base.CrudManager):
             base_url = self.base_url
 
         return super(RoleManager, self).list(base_url=base_url, **kwargs)
+
+    def add_permission(self, role, permission):
+        self._require_role_and_permission(role, permission)
+        base_url = self.base_url + '/permissions/%s' % base.getid(permission)
+
+        return super(RoleManager, self).put(
+                base_url=base_url,
+                role_id=base.getid(role))
+
+    def remove_permission(self, role, permission):
+        self._require_role_and_permission(role, permission)
+        base_url = self.base_url + '/permissions/%s' % base.getid(permission)
+
+        return super(RoleManager, self).delete(
+            base_url=base_url,
+            role_id=base.getid(role))
+
+    def add_user(self, role, user):
+        self._require_role_and_user(role, user)
+        base_url = self.base_url + '/users/%s' % base.getid(user)
+
+        return super(RoleManager, self).put(
+                base_url=base_url,
+                role_id=base.getid(role))
+
+    def remove_user(self, role, user):
+        self._require_role_and_user(role, user)
+        base_url = self.base_url + '/users/%s' % base.getid(user)
+
+        return super(RoleManager, self).delete(
+                base_url=base_url,
+                role_id=base.getid(role))
 
 
     
