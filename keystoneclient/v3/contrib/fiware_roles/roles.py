@@ -35,50 +35,19 @@ class RoleManager(base.CrudManager):
             msg = 'Specify both a role and a permission'
             raise exceptions.ValidationError(msg)
 
-    def _require_role_and_user(self, role, user):
-        if not(role and user):
-            msg = 'Specify both a role and a user'
+    def _require_role_and_user_and_organization(self, role, user, organization):
+        if not(role and user and organization):
+            msg = 'Specify a role, a user and an organization'
             raise exceptions.ValidationError(msg)
 
-    def _require_user_xor_permission(self, user, permission):
-        if user and permission:
-            msg = 'Specify either a user or permission, not both'
-            raise exceptions.ValidationError(msg)
-        elif not (user or permission):
-            msg = 'Must specify either a user or permission'
-            raise exceptions.ValidationError(msg)
+    # def _require_user_xor_permission(self, user, permission):
+    #     if user and permission:
+    #         msg = 'Specify either a user or permission, not both'
+    #         raise exceptions.ValidationError(msg)
+    #     elif not (user or permission):
+    #         msg = 'Must specify either a user or permission'
+    #         raise exceptions.ValidationError(msg)
 
-    # def _role_grants_base_url(self, user, permission):
-    #     # When called, we have already checked that only one of user & group
-    #     # and one of domain & project have been specified
-    #     params = {}
-    #     if user:
-    #         params['user_id'] = base.getid(user)
-    #         base_url += '/users/%(user_id)s/roles'
-    #     elif permission:
-    #         params['permission_id'] = base.getid(permission)
-    #         base_url += '/permissions/%(permission_id)s/roles'
-
-    #     return base_url % params
-
-    # @base.filter_kwargs
-    # def put(self, append_to_url='', **kwargs):
-    #     """Override to append elements to the url"""
-    #     url = self.build_url(dict_args_in_out=kwargs)
-    #     if append_to_url:
-    #         url += append_to_url
-
-    #     return self._update(
-    #                     url,
-    #                  method='PUT')
-
-    # def add_permission(self, role, permission):
-    #     self._require_role_and_permission(role, permission)
-        
-    #     # PUT to roles/{role_id}/permissions
-    #     endpoint = '/permissions/%s' %base.getid(permission)
-    #     return self.put(append_to_url=endpoint,
-    #                 role_id=base.getid(role))
 
     def create(self, name, is_editable=True, application=None, **kwargs):
         return super(RoleManager, self).create(
@@ -102,50 +71,50 @@ class RoleManager(base.CrudManager):
     def delete(self, role):
         return super(RoleManager, self).delete(role_id=base.getid(role))
 
-    def list(self, user=None, permission=None, **kwargs):
-    
-        if user or permission:
-            self._require_user_xor_permission(user, permission)
+    def list(self, user=None, **kwargs):
+    # def list(self, user=None, permission=None, **kwargs):    
+        # if user or permission:
+        #     self._require_user_xor_permission(user, permission)
 
         if user:
             base_url = self.base_url + '/users/%s' % base.getid(user)
 
-        elif permission:
-            base_url = self.base_url +  '/permissions/%s' % base.getid(permission)
+        # elif permission:
+        #     base_url = self.base_url +  '/permissions/%s' % base.getid(permission)
 
         else:
             base_url = self.base_url
 
         return super(RoleManager, self).list(base_url=base_url, **kwargs)
 
-    def add_permission(self, role, permission):
-        self._require_role_and_permission(role, permission)
-        base_url = self.base_url + '/permissions/%s' % base.getid(permission)
+    # def add_permission(self, role, permission):
+    #     self._require_role_and_permission(role, permission)
+    #     base_url = self.base_url + '/permissions/%s' % base.getid(permission)
+        
+    #     return super(RoleManager, self).put(
+    #             base_url=base_url,
+    #             role_id=base.getid(role))
 
+    # def remove_permission(self, role, permission):
+    #     self._require_role_and_permission(role, permission)
+    #     base_url = self.base_url + '/permissions/%s' % base.getid(permission)
+
+    #     return super(RoleManager, self).delete(
+    #         base_url=base_url,
+    #         role_id=base.getid(role))
+
+    def add_user(self, role, user, organization):
+        self._require_role_and_user_and_organization(role, user, organization)
+        base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
+        
         return super(RoleManager, self).put(
                 base_url=base_url,
                 role_id=base.getid(role))
 
-    def remove_permission(self, role, permission):
-        self._require_role_and_permission(role, permission)
-        base_url = self.base_url + '/permissions/%s' % base.getid(permission)
-
-        return super(RoleManager, self).delete(
-            base_url=base_url,
-            role_id=base.getid(role))
-
-    def add_user(self, role, user):
-        self._require_role_and_user(role, user)
-        base_url = self.base_url + '/users/%s' % base.getid(user)
-
-        return super(RoleManager, self).put(
-                base_url=base_url,
-                role_id=base.getid(role))
-
-    def remove_user(self, role, user):
-        self._require_role_and_user(role, user)
-        base_url = self.base_url + '/users/%s' % base.getid(user)
-
+    def remove_user(self, role, user, organization):
+        self._require_role_and_user_and_organization(role, user, organization)
+        base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
+    
         return super(RoleManager, self).delete(
                 base_url=base_url,
                 role_id=base.getid(role))

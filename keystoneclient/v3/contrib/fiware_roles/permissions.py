@@ -58,26 +58,7 @@ class PermissionManager(base.CrudManager):
         return super(PermissionManager, self).delete(
                             permission_id=base.getid(permission))
 
-    #No Funciona
-    # def add_role(self, role, permission):
-    #     self._require_role_and_permission(role, permission)
-    #     base_url = '/OS-ROLES'
-        
-    #     base_url = base_url + '/roles/%s/permissions/' % base.getid(role)
-    #     return super(PermissionManager, self).put(
-    #         base_url=base_url,
-    #         permission_id=base.getid(permission))
-
-    # def remove_role(self, role, permission):
-    #     self._require_role_and_permission(role, permission)
-    #     base_url = '/OS-ROLES'
-    #     base_url += '/roles/%s' % base.getid(role)
-    #     return super(PermissionManager, self).delete(
-    #         base_url=base_url,
-    #         permission_id=base.getid(permission))
-
     def list(self, role=None, **kwargs):  
-
         if role:
             base_url = self.base_url + '/roles/%s' % base.getid(role)
 
