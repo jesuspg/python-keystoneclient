@@ -1,11 +1,10 @@
-
 from keystoneclient.v3 import client
 from keystoneclient import session
 from keystoneclient.v3.contrib.oauth2 import auth
 url = 'http://127.0.0.1:5000/v3'
 #keystone = client.Client(token='ADMIN',endpoint=url)
 
-keystone=client.Client(username='admin', password='secrete',
+keystone = client.Client(username='admin', password='secrete',
                         project_name='demo', auth_url=url)
 
 #Basic Role Actions:
@@ -53,11 +52,11 @@ if 0:
     permission2 = keystone.fiware_roles.permissions.create(name='Permission Test 2')
     permission2_id = permission2.id
 
-    keystone.fiware_roles.permissions.add_role(role1, permission1)
+    keystone.fiware_roles.permissions.add_to_role(role1, permission1)
     print('\n Permissions that belong to role 1: \n')
     print keystone.fiware_roles.permissions.list(role=role1)
 
-    keystone.fiware_roles.permissions.add_role(role1, permission2)
+    keystone.fiware_roles.permissions.add_to_role(role1, permission2)
     print('\n Permissions that belong to role 1 (after adding permission 1 and 2): \n')
     print keystone.fiware_roles.permissions.list(role=role1)
 
@@ -65,7 +64,7 @@ if 0:
     print('\n Permissions that belong to role 1 (after removing permission 1): \n')
     print keystone.fiware_roles.permissions.list(role=role1)
 
-    keystone.fiware_roles.permissions.add_role(role1, permission1)
+    keystone.fiware_roles.permissions.add_to_role(role1, permission1)
     keystone.fiware_roles.permissions.delete(permission1)
     print('\n Permissions that belong to role 1 (after deleting permission 1): \n')
     print keystone.fiware_roles.permissions.list(role=role1)
@@ -80,14 +79,15 @@ if 0:
     role2 = keystone.fiware_roles.roles.create(name='Role Test 2')
     role2_id = role2.id
 
-    organization= keystone.projects.create(name='organization', domain='default')
-    user = keystone.users.create(name='user',password='user',project=organization)
+    name = 'testitester'
+    organization = keystone.projects.create(name=name, domain='default')
+    user = keystone.users.create(name=name, password='user', project=organization)
 
-    keystone.fiware_roles.roles.add_user(role1, user, organization)
+    keystone.fiware_roles.roles.add_to_user(role1, user, organization)
     print('\n Roles that belong to user: \n')
     print keystone.fiware_roles.roles.list(user=user)
 
-    keystone.fiware_roles.roles.add_user(role2, user, organization)
+    keystone.fiware_roles.roles.add_to_user(role2, user, organization)
     print('\n Roles that belong to user (after adding role 1 and 2 to user): \n')
     print keystone.fiware_roles.roles.list(user=user)
 
@@ -95,7 +95,7 @@ if 0:
     print('\n Roles that belong to user (after removing role 1): \n')
     print keystone.fiware_roles.roles.list(user=user)
 
-    keystone.fiware_roles.roles.add_user(role1, user)
+    keystone.fiware_roles.roles.add_to_user(role1, user)
     keystone.fiware_roles.roles.delete(role1)
     print('\n Roles that belong to user (after deleting role 1): \n')
     print keystone.fiware_roles.roles.list(user=user)
@@ -103,4 +103,4 @@ if 0:
 
     keystone.fiware_roles.roles.delete(role2)
     keystone.projects.delete(organization)
-    kesytone.users.delete(user)
+    keystone.users.delete(user)
