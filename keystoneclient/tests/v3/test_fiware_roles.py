@@ -64,7 +64,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         returned_list = self.manager.list(user=user_id)
 
         self.assertEqual(len(ref_list), len(returned_list))
-        [self.assertIsInstance(r, self.model) for r in returned_list]
+        for role in returned_list:
+            self.assertIsInstance(role, self.model) 
 
     # def test_list_roles_by_user_and_permission(self):
     #     user_id = uuid.uuid4().hex
@@ -76,53 +77,14 @@ class RoleTests(utils.TestCase, utils.CrudTests):
     #                       user=user_id,
     #                       permission=permission_id)
 
-    # def test_add_role_to_permission(self):
-    #     permission_id = uuid.uuid4().hex
-    #     role_ref = self.new_ref()
-    #     self.stub_url('PUT',
-    #                   [self.path_prefix, 'permissions',permission_id,
-    #                    self.collection_key, role_ref['id']], 
-    #                   status_code=204)
-    #     self.manager.add_permission(role=role_ref['id'], permission=permission_id)
-
-    #     # Test invalid args
-    #     self.assertRaises(exceptions.ValidationError,
-    #                       self.manager.add_permission,
-    #                       role=role_ref['id'],
-    #                       permission=None)
-    #     self.assertRaises(exceptions.ValidationError,
-    #                       self.manager.add_permission,
-    #                       role=None,
-    #                       permission=permission_id)
-
-    # def test_remove_role_from_permission(self):
-
-    #     permission_id = uuid.uuid4().hex
-    #     role_ref = self.new_ref()
-    #     self.stub_url('DELETE',
-    #                   [self.path_prefix, 'permissions',permission_id,
-    #                    self.collection_key, role_ref['id']],
-    #                   status_code=204)
-    #     self.manager.remove_permission(role=role_ref['id'], permission=permission_id)
-
-    #     # Test invalid args
-    #     self.assertRaises(exceptions.ValidationError,
-    #                       self.manager.remove_permission,
-    #                       role=role_ref['id'],
-    #                       permission=None)
-    #     self.assertRaises(exceptions.ValidationError,
-    #                       self.manager.remove_permission,
-    #                       role=None,
-    #                       permission=permission_id)
-
     def test_add_role_to_user(self):
 
         user_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         organization_id = uuid.uuid4().hex
         self.stub_url('PUT',
-                      [self.path_prefix,'users',user_id,
-                      'organizations',organization_id,
+                      [self.path_prefix, 'users', user_id,
+                      'organizations', organization_id,
                        self.collection_key, role_ref['id']],
                        status_code=204)
         self.manager.add_user(role=role_ref['id'], 
@@ -146,8 +108,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         role_ref = self.new_ref()
         organization_id = uuid.uuid4().hex
         self.stub_url('DELETE',
-                        [self.path_prefix,'users', user_id,
-                         'organizations',organization_id,
+                        [self.path_prefix, 'users', user_id,
+                         'organizations', organization_id,
                          self.collection_key, role_ref['id']],
                          status_code=204)
         self.manager.remove_user(role=role_ref['id'], 
@@ -203,7 +165,7 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
         permission_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         self.stub_url('PUT',
-                      [self.path_prefix, 'roles',role_ref['id'],
+                      [self.path_prefix, 'roles', role_ref['id'],
                        self.collection_key, permission_id], 
                       status_code=204)
         self.manager.add_role(role=role_ref['id'], permission=permission_id)
@@ -223,7 +185,7 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
         permission_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         self.stub_url('DELETE',
-                      [self.path_prefix, 'roles',role_ref['id'],
+                      [self.path_prefix, 'roles', role_ref['id'],
                        self.collection_key, permission_id], 
                       status_code=204)
         self.manager.remove_role(role=role_ref['id'], permission=permission_id)
