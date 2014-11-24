@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from keystoneclient import base
+from keystoneclient import exceptions
 from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
 
 class Permission(base.Resource):
@@ -27,6 +28,11 @@ class PermissionManager(base.CrudManager):
     collection_key = 'permissions'
     key = 'permission'
     base_url = ROLES_PATH
+
+    def _require_role_and_permission(self, role, permission):
+        if not (role and permission):
+            msg = 'Specify both a role and a permission'
+            raise exceptions.ValidationError(msg)
 
     def create(self, name, is_editable=True, application=None, **kwargs):
         return super(PermissionManager, self).create(
@@ -46,7 +52,32 @@ class PermissionManager(base.CrudManager):
                                         is_editable=is_editable,
                                         application=application,
                                         **kwargs)
-        
+      
+
     def delete(self, permission):
         return super(PermissionManager, self).delete(
                             permission_id=base.getid(permission))
+
+    def list(self, role=None, **kwargs):  
+        if role:
+            base_url = self.base_url + '/roles/%s' % base.getid(role)
+
+        else:
+            base_url = self.base_url 
+        return super(PermissionManager, self).list(base_url=base_url,**kwargs)
+
+    def add_role(self, role, permission):
+        self._require_role_and_permission(role, permission)
+        base_url = self.base_url + '/roles/%s' % base.getid(role)
+
+        return super(PermissionManager, self).put(
+            base_url=base_url,
+            permission_id=base.getid(permission))
+
+    def remove_role(self, role, permission):
+        self._require_role_and_permission(role, permission)
+        base_url = self.base_url + '/roles/%s' % base.getid(role)
+
+        return super(PermissionManager, self).delete(
+            base_url=base_url,
+            permission_id=base.getid(permission))
