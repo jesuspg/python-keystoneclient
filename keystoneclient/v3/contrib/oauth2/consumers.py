@@ -75,3 +75,11 @@ class ConsumerManager(ks_base.CrudManager):
     def delete(self, consumer):
         return super(ConsumerManager, self).delete(
                             consumer_id=ks_base.getid(consumer))
+
+    def list(self, user=None, **kwargs):  
+        if user:
+            base_url = self.base_url + '/users/%s' % base.getid(user)
+
+        else:
+            base_url = self.base_url 
+        return super(ConsumerManager, self).list(base_url=base_url, **kwargs)

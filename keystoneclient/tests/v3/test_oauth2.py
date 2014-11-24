@@ -89,6 +89,20 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
         #self.assertIsNotNone(consumer.id)
         self.assertIsNone(consumer.description)
 
+    def test_list_consumers_by_user(self):
+        user_id = uuid.uuid4().hex
+        ref_list = [self.new_ref(), self.new_ref()]
+
+        self.stub_entity('GET',
+                      parts=[self.path_prefix, 'users', user_id, self.collection_key],
+                      entity=ref_list)
+
+        returned_list = self.manager.list(user=user_id)
+
+        self.assertEqual(len(ref_list), len(returned_list))
+        for item in returned_list:
+            self.assertIsInstance(item, self.model)
+
 
 
 class AuthorizationCodeTests(utils.TestCase):
