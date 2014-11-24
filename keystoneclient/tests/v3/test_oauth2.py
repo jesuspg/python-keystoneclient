@@ -47,6 +47,7 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
 
     def new_ref(self, **kwargs):
         kwargs = super(ConsumerTests, self).new_ref(**kwargs)
+        kwargs.setdefault('name', uuid.uuid4().hex)
         kwargs.setdefault('description', uuid.uuid4().hex)
         kwargs.setdefault('client_type', self.DEFAULT_CLIENT_TYPE)
         kwargs.setdefault('redirect_uris', self.DEFAULT_REDIRECT_URIS)
@@ -54,13 +55,16 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
         kwargs.setdefault('grant_type', self.DEFAULT_GRANT_TYPE)
         return kwargs
 
-    def _consumer_data(self, description=None, 
+    def _consumer_data(self, name=None, description=None, 
                         client_type=DEFAULT_CLIENT_TYPE,
                         redirect_uris=DEFAULT_REDIRECT_URIS,
                         grant_type=DEFAULT_GRANT_TYPE,
                         scopes=DEFAULT_SCOPES):
+        if not name:
+            name = uuid.uuid4().hex
         data = {
             'consumer': {
+                'name': name,
                 'description': description,
                 'client_type': client_type,
                 'redirect_uris': redirect_uris,
@@ -75,7 +79,7 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
                     [self.path_prefix, self.collection_key],
                     status_code=201, json=consumer_data)
 
-        consumer = self.manager.create()
+        consumer = self.manager.create(uuid.uuid4().hex)
         return consumer
 
     def test_create_consumer_defaults(self):

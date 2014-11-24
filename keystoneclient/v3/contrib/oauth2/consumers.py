@@ -45,9 +45,10 @@ class ConsumerManager(ks_base.CrudManager):
     key = 'consumer'
     base_url = utils.OAUTH2_PATH
 
-    def create(self, description=None, client_type=None, redirect_uris=[],
+    def create(self, name, description=None, client_type=None, redirect_uris=[],
                 grant_type=None, scopes=[], **kwargs):
         return super(ConsumerManager, self).create(
+                                name=name,
                                 description=description,
                                 client_type=client_type,
                                 redirect_uris=redirect_uris,
@@ -59,10 +60,11 @@ class ConsumerManager(ks_base.CrudManager):
         return super(ConsumerManager, self).get(
                                     consumer_id=ks_base.getid(consumer))
 
-    def update(self, consumer, description=None, client_type=None, 
+    def update(self, consumer, name=None, description=None, client_type=None, 
                 redirect_uris=[], grant_type=None, scopes=[], **kwargs):
         return super(ConsumerManager, self).update(
                                         consumer_id=ks_base.getid(consumer),
+                                        name=name,
                                         description=description,
                                         client_type=client_type,
                                         redirect_uris=redirect_uris,
