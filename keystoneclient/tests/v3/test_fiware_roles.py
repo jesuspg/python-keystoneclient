@@ -168,7 +168,7 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
                       [self.path_prefix, 'roles', role_ref['id'],
                        self.collection_key, permission_id], 
                       status_code=204)
-        self.manager.add_role(role=role_ref['id'], permission=permission_id)
+        self.manager.add_to_role(role=role_ref['id'], permission=permission_id)
 
         # Test invalid args
         self.assertRaises(exceptions.ValidationError,
@@ -188,7 +188,7 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
                       [self.path_prefix, 'roles', role_ref['id'],
                        self.collection_key, permission_id], 
                       status_code=204)
-        self.manager.remove_role(role=role_ref['id'], permission=permission_id)
+        self.manager.remove_from_role(role=role_ref['id'], permission=permission_id)
 
         # Test invalid args
         self.assertRaises(exceptions.ValidationError,

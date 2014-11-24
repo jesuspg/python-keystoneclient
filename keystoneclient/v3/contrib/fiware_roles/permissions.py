@@ -64,9 +64,9 @@ class PermissionManager(base.CrudManager):
 
         else:
             base_url = self.base_url 
-        return super(PermissionManager, self).list(base_url=base_url,**kwargs)
+        return super(PermissionManager, self).list(base_url=base_url, **kwargs)
 
-    def add_role(self, role, permission):
+    def add_to_role(self, role, permission):
         self._require_role_and_permission(role, permission)
         base_url = self.base_url + '/roles/%s' % base.getid(role)
 
@@ -74,7 +74,7 @@ class PermissionManager(base.CrudManager):
             base_url=base_url,
             permission_id=base.getid(permission))
 
-    def remove_role(self, role, permission):
+    def remove_from_role(self, role, permission):
         self._require_role_and_permission(role, permission)
         base_url = self.base_url + '/roles/%s' % base.getid(role)
 
