@@ -30,11 +30,6 @@ class RoleManager(base.CrudManager):
     key = 'role'
     base_url = ROLES_PATH
 
-    def _require_role_and_permission(self, role, permission):
-        if not (role and permission):
-            msg = 'Specify both a role and a permission'
-            raise exceptions.ValidationError(msg)
-
     def _require_role_and_user_and_organization(self, role, user, organization):
         if not(role and user and organization):
             msg = 'Specify a role, a user and an organization'
@@ -47,7 +42,6 @@ class RoleManager(base.CrudManager):
     #     elif not (user or permission):
     #         msg = 'Must specify either a user or permission'
     #         raise exceptions.ValidationError(msg)
-
 
     def create(self, name, is_editable=True, application=None, **kwargs):
         return super(RoleManager, self).create(
@@ -87,23 +81,8 @@ class RoleManager(base.CrudManager):
 
         return super(RoleManager, self).list(base_url=base_url, **kwargs)
 
-    # def add_permission(self, role, permission):
-    #     self._require_role_and_permission(role, permission)
-    #     base_url = self.base_url + '/permissions/%s' % base.getid(permission)
-        
-    #     return super(RoleManager, self).put(
-    #             base_url=base_url,
-    #             role_id=base.getid(role))
 
-    # def remove_permission(self, role, permission):
-    #     self._require_role_and_permission(role, permission)
-    #     base_url = self.base_url + '/permissions/%s' % base.getid(permission)
-
-    #     return super(RoleManager, self).delete(
-    #         base_url=base_url,
-    #         role_id=base.getid(role))
-
-    def add_user(self, role, user, organization):
+    def add_to_user(self, role, user, organization):
         self._require_role_and_user_and_organization(role, user, organization)
         base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
         
@@ -111,7 +90,7 @@ class RoleManager(base.CrudManager):
                 base_url=base_url,
                 role_id=base.getid(role))
 
-    def remove_user(self, role, user, organization):
+    def remove_from_user(self, role, user, organization):
         self._require_role_and_user_and_organization(role, user, organization)
         base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
     

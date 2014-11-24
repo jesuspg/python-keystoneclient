@@ -64,8 +64,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         returned_list = self.manager.list(user=user_id)
 
         self.assertEqual(len(ref_list), len(returned_list))
-        for role in returned_list:
-            self.assertIsInstance(role, self.model) 
+        for item in returned_list:
+            self.assertIsInstance(item, self.model) 
 
     # def test_list_roles_by_user_and_permission(self):
     #     user_id = uuid.uuid4().hex
@@ -87,18 +87,18 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                       'organizations', organization_id,
                        self.collection_key, role_ref['id']],
                        status_code=204)
-        self.manager.add_user(role=role_ref['id'], 
+        self.manager.add_to_user(role=role_ref['id'], 
                               user=user_id,
                               organization=organization_id)
 
         #Test invalid args
         self.assertRaises(exceptions.ValidationError,
-                            self.manager.add_user,
+                            self.manager.add_to_user,
                             role=role_ref['id'],
                             user=None,
                             organization=None)
         self.assertRaises(exceptions.ValidationError,
-                            self.manager.add_user,
+                            self.manager.add_to_user,
                             role=None,
                             user=user_id,
                             organization=organization_id)
@@ -112,18 +112,18 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                          'organizations', organization_id,
                          self.collection_key, role_ref['id']],
                          status_code=204)
-        self.manager.remove_user(role=role_ref['id'], 
+        self.manager.remove_from_user(role=role_ref['id'], 
                                  user=user_id,
                                  organization=organization_id)
 
         #Test invalid args
         self.assertRaises(exceptions.ValidationError,
-                            self.manager.remove_user,
+                            self.manager.remove_from_user,
                             role=role_ref['id'],
                             user=None,
                             organization=None)
         self.assertRaises(exceptions.ValidationError,
-                            self.manager.remove_user,
+                            self.manager.remove_from_user,
                             role=None,
                             user=user_id,
                             organization=organization_id)
@@ -158,7 +158,8 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
         returned_list = self.manager.list(role=role_id)
 
         self.assertEqual(len(ref_list), len(returned_list))
-        [self.assertIsInstance(r, self.model) for r in returned_list]
+        for item in returned_list:
+            self.assertIsInstance(item, self.model)
 
     def test_add_permission_to_role(self):
 
@@ -172,11 +173,11 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
 
         # Test invalid args
         self.assertRaises(exceptions.ValidationError,
-                          self.manager.add_role,
+                          self.manager.add_to_role,
                           role=role_ref['id'],
                           permission=None)
         self.assertRaises(exceptions.ValidationError,
-                          self.manager.add_role,
+                          self.manager.add_to_role,
                           role=None,
                           permission=permission_id)
 
@@ -192,11 +193,11 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
 
         # Test invalid args
         self.assertRaises(exceptions.ValidationError,
-                          self.manager.remove_role,
+                          self.manager.remove_from_role,
                           role=role_ref['id'],
                           permission=None)
         self.assertRaises(exceptions.ValidationError,
-                          self.manager.remove_role,
+                          self.manager.remove_from_role,
                           role=None,
                           permission=permission_id)
 
