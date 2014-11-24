@@ -13,12 +13,12 @@
 # limitations under the License.
 import logging
 
-from keystoneclient import base as ks_base
+from keystoneclient import base
 from keystoneclient.v3.contrib.oauth2 import utils
 
 LOG = logging.getLogger(__name__)
 
-class Consumer(ks_base.Resource):
+class Consumer(base.Resource):
     """Represents an OAuth2 consumer.
     Attributes:
     * id: a uuid that identifies the consumer
@@ -38,7 +38,7 @@ class Consumer(ks_base.Resource):
     """
     pass
 
-class ConsumerManager(ks_base.CrudManager):
+class ConsumerManager(base.CrudManager):
     """Manager class for manipulating identity consumers."""
     resource_class = Consumer
     collection_key = 'consumers'
@@ -46,7 +46,7 @@ class ConsumerManager(ks_base.CrudManager):
     base_url = utils.OAUTH2_PATH
 
     def create(self, name, description=None, client_type=None, redirect_uris=[],
-                grant_type=None, scopes=[], **kwargs):
+                grant_type=None, scopes=[], extras=None, **kwargs):
         return super(ConsumerManager, self).create(
                                 name=name,
                                 description=description,
@@ -54,16 +54,17 @@ class ConsumerManager(ks_base.CrudManager):
                                 redirect_uris=redirect_uris,
                                 grant_type=grant_type,
                                 scopes=scopes,
+                                extras=None,
                                 **kwargs)
 
     def get(self, consumer):
         return super(ConsumerManager, self).get(
-                                    consumer_id=ks_base.getid(consumer))
+                                    consumer_id=base.getid(consumer))
 
     def update(self, consumer, name=None, description=None, client_type=None, 
                 redirect_uris=[], grant_type=None, scopes=[], **kwargs):
         return super(ConsumerManager, self).update(
-                                        consumer_id=ks_base.getid(consumer),
+                                        consumer_id=base.getid(consumer),
                                         name=name,
                                         description=description,
                                         client_type=client_type,
@@ -74,7 +75,7 @@ class ConsumerManager(ks_base.CrudManager):
         
     def delete(self, consumer):
         return super(ConsumerManager, self).delete(
-                            consumer_id=ks_base.getid(consumer))
+                            consumer_id=base.getid(consumer))
 
     def list(self, user=None, **kwargs):  
         if user:
