@@ -34,7 +34,7 @@ from keystoneclient import v2_0
 from keystoneclient import v3
 
 
-__version__ = pbr.version.VersionInfo('python-keystoneclient').version_string()
+#__version__ = pbr.version.VersionInfo('python-keystoneclient').version_string()
 
 __all__ = [
     # Modules
