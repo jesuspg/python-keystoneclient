@@ -15,6 +15,7 @@ ChangeLog
 build
 dist
 python_keystoneclient.egg-info
+fiwareclient.egg-info
 keystoneclient/versioninfo
 doc/source/api
 # Development environment files
