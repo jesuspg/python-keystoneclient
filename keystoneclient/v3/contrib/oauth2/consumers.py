@@ -46,7 +46,7 @@ class ConsumerManager(base.CrudManager):
     base_url = utils.OAUTH2_PATH
 
     def create(self, name, description=None, client_type=None, redirect_uris=[],
-                grant_type=None, scopes=[], extras=None, **kwargs):
+                grant_type=None, scopes=[], **kwargs):
         return super(ConsumerManager, self).create(
                                 name=name,
                                 description=description,
@@ -54,7 +54,6 @@ class ConsumerManager(base.CrudManager):
                                 redirect_uris=redirect_uris,
                                 grant_type=grant_type,
                                 scopes=scopes,
-                                extras=None,
                                 **kwargs)
 
     def get(self, consumer):
