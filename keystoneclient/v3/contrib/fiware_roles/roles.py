@@ -30,9 +30,9 @@ class RoleManager(base.CrudManager):
     key = 'role'
     base_url = ROLES_PATH
 
-    def _require_role_and_user_and_organization(self, role, user, organization):
-        if not(role and user and organization):
-            msg = 'Specify a role, a user and an organization'
+    def _require_user_and_organization(self, user, organization):
+        if (not user and organization) or (user and not organization):
+            msg = 'Specify both a user and an organization'
             raise exceptions.ValidationError(msg)
 
     # def _require_user_xor_permission(self, user, permission):
@@ -65,34 +65,28 @@ class RoleManager(base.CrudManager):
     def delete(self, role):
         return super(RoleManager, self).delete(role_id=base.getid(role))
 
-    def list(self, user=None, **kwargs):
-    # def list(self, user=None, permission=None, **kwargs):    
-        # if user or permission:
-        #     self._require_user_xor_permission(user, permission)
+    def list(self, user=None, organization=None, **kwargs):
+        self._require_user_and_organization(user, organization)
 
-        if user:
-            base_url = self.base_url + '/users/%s' % base.getid(user)
-
-        # elif permission:
-        #     base_url = self.base_url +  '/permissions/%s' % base.getid(permission)
-
+        if user and organization:
+            base_url = self.base_url + '/users/%s/organizations/%s' \
+                % (base.getid(user), base.getid(organization))
         else:
             base_url = self.base_url
 
         return super(RoleManager, self).list(base_url=base_url, **kwargs)
 
-
     def add_to_user(self, role, user, organization):
-        self._require_role_and_user_and_organization(role, user, organization)
-        base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
+        base_url = self.base_url + '/users/%s/organizations/%s' \
+            % (base.getid(user), base.getid(organization))
         
         return super(RoleManager, self).put(
                 base_url=base_url,
                 role_id=base.getid(role))
 
     def remove_from_user(self, role, user, organization):
-        self._require_role_and_user_and_organization(role, user, organization)
-        base_url = self.base_url + '/users/%s/organizations/%s' % (base.getid(user), base.getid(organization))
+        base_url = self.base_url + '/users/%s/organizations/%s' \
+            % (base.getid(user), base.getid(organization))
     
         return super(RoleManager, self).delete(
                 base_url=base_url,

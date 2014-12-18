@@ -56,16 +56,29 @@ class RoleTests(utils.TestCase, utils.CrudTests):
     def test_list_roles_by_user(self):
         user_id = uuid.uuid4().hex
         ref_list = [self.new_ref(), self.new_ref()]
-
+        organization_id = uuid.uuid4().hex
         self.stub_entity('GET',
-                      parts=[self.path_prefix, 'users', user_id, self.collection_key],
+                      parts=[self.path_prefix, 'users', user_id, 
+                        'organizations', organization_id,
+                        self.collection_key],
                       entity=ref_list)
 
-        returned_list = self.manager.list(user=user_id)
+        returned_list = self.manager.list(user=user_id,
+                              organization=organization_id)
 
         self.assertEqual(len(ref_list), len(returned_list))
         for item in returned_list:
-            self.assertIsInstance(item, self.model) 
+            self.assertIsInstance(item, self.model)
+
+        # Test invalid args
+        self.assertRaises(exceptions.ValidationError,
+                            self.manager.list,
+                            user=user_id,
+                            organization=None)
+        self.assertRaises(exceptions.ValidationError,
+                            self.manager.list,
+                            user=None,
+                            organization=organization_id)
 
     # def test_list_roles_by_user_and_permission(self):
     #     user_id = uuid.uuid4().hex
@@ -91,18 +104,6 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                               user=user_id,
                               organization=organization_id)
 
-        #Test invalid args
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.add_to_user,
-                            role=role_ref['id'],
-                            user=None,
-                            organization=None)
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.add_to_user,
-                            role=None,
-                            user=user_id,
-                            organization=organization_id)
-
     def test_remove_role_from_user(self):
         user_id = uuid.uuid4().hex
         role_ref = self.new_ref()
@@ -112,22 +113,10 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                          'organizations', organization_id,
                          self.collection_key, role_ref['id']],
                          status_code=204)
+
         self.manager.remove_from_user(role=role_ref['id'], 
                                  user=user_id,
                                  organization=organization_id)
-
-        #Test invalid args
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.remove_from_user,
-                            role=role_ref['id'],
-                            user=None,
-                            organization=None)
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.remove_from_user,
-                            role=None,
-                            user=user_id,
-                            organization=organization_id)
-
 
 
 class PermissionTests(utils.TestCase, utils.CrudTests):
