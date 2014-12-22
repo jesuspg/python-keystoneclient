@@ -118,6 +118,27 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                                  user=user_id,
                                  organization=organization_id)
 
+    def test_list_allowed_roles_to_assign(self):
+      user_id = uuid.uuid4().hex
+      organization_id = uuid.uuid4().hex
+      allowed_roles_ref = {
+        'some_application': [
+            self.new_ref(),
+            self.new_ref(),
+        ]
+      }
+      self.stub_url('GET',
+                      [self.path_prefix, 'users', user_id,
+                            'organizations', organization_id,
+                            'roles/allowed'],
+                      json=allowed_roles_ref)
+      allowed_roles = self.manager.list_allowed_roles_to_assign(user=user_id,
+                                                organization=organization_id)
+
+      self.assertIsNotNone(allowed_roles)
+      for item in allowed_roles['some_application']:
+        self.assertIsInstance(item, self.model)
+
 
 class PermissionTests(utils.TestCase, utils.CrudTests):
 

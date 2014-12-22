@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from keystoneclient import base
 from keystoneclient import exceptions
 from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
@@ -92,5 +94,19 @@ class RoleManager(base.CrudManager):
                 base_url=base_url,
                 role_id=base.getid(role))
 
+    def list_allowed_roles_to_assign(self, user, organization):
+        """Obtain a list of all the roles the user is allowed to assign
+        for every application.
+        """
+        endpoint = self.base_url + '/users/%s/organizations/%s/roles/allowed' \
+            % (base.getid(user), base.getid(organization))
+        resp, body = self.client.get(endpoint)
+        allowed_roles = json.loads(resp.content)
+        roles_as_resource = {}
+        for app in allowed_roles:
+            for role in allowed_roles[app]:
+                roles_as_resource[app] = roles_as_resource.get(app, [])
+                roles_as_resource[app].append(self.resource_class(self, role))
+        return roles_as_resource
 
     
