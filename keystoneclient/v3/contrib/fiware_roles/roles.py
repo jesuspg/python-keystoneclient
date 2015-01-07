@@ -45,22 +45,22 @@ class RoleManager(base.CrudManager):
     #         msg = 'Must specify either a user or permission'
     #         raise exceptions.ValidationError(msg)
 
-    def create(self, name, is_editable=True, application=None, **kwargs):
+    def create(self, name, is_internal=False, application=None, **kwargs):
         return super(RoleManager, self).create(
                                         name=name,
-                                        is_editable=is_editable,
+                                        is_internal=is_internal,
                                         application=application,
                                         **kwargs)
     def get(self, role):
         return super(RoleManager, self).get(
                                     role_id=base.getid(role))
 
-    def update(self, role, name=None, is_editable=True, 
+    def update(self, role, name=None, is_internal=False, 
                 application=None, **kwargs):
         return super(RoleManager, self).update(
                                         role_id=base.getid(role),
                                         name=name,
-                                        is_editable=is_editable,
+                                        is_internal=is_internal,
                                         application=application,
                                         **kwargs)
         

@@ -36,7 +36,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
     def new_ref(self, **kwargs):
         kwargs = super(RoleTests, self).new_ref(**kwargs)
         kwargs.setdefault('name', uuid.uuid4().hex)
-        kwargs.setdefault('is_editable', True)
+        kwargs.setdefault('is_internal', False)
         return kwargs
 
 
@@ -154,7 +154,7 @@ class PermissionTests(utils.TestCase, utils.CrudTests):
     def new_ref(self, **kwargs):
         kwargs = super(PermissionTests, self).new_ref(**kwargs)
         kwargs.setdefault('name', uuid.uuid4().hex)
-        kwargs.setdefault('is_editable', True)
+        kwargs.setdefault('is_internal', False)
         return kwargs
 
     def test_list_permissions_by_role(self):

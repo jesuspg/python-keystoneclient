@@ -34,22 +34,22 @@ class PermissionManager(base.CrudManager):
             msg = 'Specify both a role and a permission'
             raise exceptions.ValidationError(msg)
 
-    def create(self, name, is_editable=True, application=None, **kwargs):
+    def create(self, name, is_internal=False, application=None, **kwargs):
         return super(PermissionManager, self).create(
                                         name=name,
-                                        is_editable=is_editable,
+                                        is_internal=is_internal,
                                         application=application,
                                         **kwargs)
     def get(self, permission):
         return super(PermissionManager, self).get(
                                     permission_id=base.getid(permission))
 
-    def update(self, permission, name=None, is_editable=True, 
+    def update(self, permission, name=None, is_internal=False, 
                 application=None, **kwargs):
         return super(PermissionManager, self).update(
                                         permission_id=base.getid(permission),
                                         name=name,
-                                        is_editable=is_editable,
+                                        is_internal=is_internal,
                                         application=application,
                                         **kwargs)
       
