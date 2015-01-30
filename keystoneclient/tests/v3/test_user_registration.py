@@ -16,21 +16,21 @@ import uuid
 
 from keystoneclient import exceptions
 from keystoneclient.tests.v3 import utils
-from keystoneclient.v3.contrib.user_registration import registration
-from keystoneclient.v3.contrib.user_registration import activation
-from keystoneclient.v3.contrib.user_registration import resetpassword
+from keystoneclient.v3.contrib.user_registration import users
+from keystoneclient.v3.contrib.user_registration import activation_key
+from keystoneclient.v3.contrib.user_registration import token
 
 
 EXTENSION_PATH = 'OS-REGISTRATION'
 
-class RegistrationTests(utils.TestCase):
+class UsersTests(utils.TestCase):
 
     def setUp(self):
-        super(RegistrationTests, self).setUp()
+        super(UsersTests, self).setUp()
         self.key = 'user'
         self.collection_key = 'users'
-        self.model = registration.Registration
-        self.manager = self.client.user_registration.registration
+        self.model = users.Users
+        self.manager = self.client.user_registration.users
         self.path_prefix = EXTENSION_PATH
 
 
@@ -50,14 +50,32 @@ class RegistrationTests(utils.TestCase):
 
         self.manager.register_user(name=name)
 
-class ActivationTests(utils.TestCase):
+    def test_activate_user(self):
+        user_id = uuid.uuid4().hex
+        activation_key = uuid.uuid4().hex
+        self.stub_url('PATCH',
+                      [self.path_prefix, 'activate', activation_key,
+                       'users', user_id],
+                      status_code=200)
+        self.manager.activate_user(user=user_id, activation_key=activation_key)
+
+    def test_reset_password(self):
+        user_id = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        self.stub_url('PATCH',
+                      [self.path_prefix, 'reset_password', token,
+                       self.collection_key, user_id],
+                      status_code=204)
+        self.manager.reset_password(user=user_id, reset_token=token)
+
+class ActivationKeyTests(utils.TestCase):
 
     def setUp(self):
-        super(ActivationTests, self).setUp()
+        super(ActivationKeyTests, self).setUp()
         self.key = 'activation_key'
         self.collection_key = 'activate'
-        self.model = activation.Activation
-        self.manager = self.client.user_registration.activation
+        self.model = activation_key.ActivationKey
+        self.manager = self.client.user_registration.activation_key
         self.path_prefix = EXTENSION_PATH
 
     def test_new_activation_key(self):
@@ -68,29 +86,20 @@ class ActivationTests(utils.TestCase):
             }
         }
         self.stub_url('GET',
-                    [self.path_prefix, 'users',
-                    user_id, 'activate'],
-                    json=activation_key_ref,
-                    status_code=200)
+                      [self.path_prefix, 'users',
+                       user_id, 'activate'],
+                      json=activation_key_ref,
+                      status_code=200)
         self.manager.new_activation_key(user=user_id)
 
-    def test_activate_user(self):
-        user_id = uuid.uuid4().hex
-        activation_key = uuid.uuid4().hex
-        self.stub_url('PATCH',
-                      [self.path_prefix, 'users',
-                       user_id, 'activate', activation_key],
-                      status_code=200)
-        self.manager.activate_user(user=user_id, activation_key=activation_key)
-
-class ResetPasswordTest(utils.TestCase):
+class TokenTest(utils.TestCase):
 
     def setUp(self):
-        super(ResetPasswordTest, self).setUp()
+        super(TokenTest, self).setUp()
         self.key = 'token'
         self.collection_key = 'reset_password'
-        self.model = resetpassword.ResetPassword
-        self.manager = self.client.user_registration.resetpassword
+        self.model = token.Token
+        self.manager = self.client.user_registration.token
         self.path_prefix = EXTENSION_PATH
 
     def test_get_reset_token(self):
@@ -106,13 +115,3 @@ class ResetPasswordTest(utils.TestCase):
                        json=reset_token_ref,
                       status_code=204)
         self.manager.get_reset_token(user=user_id)
-
-    def test_reset_password(self):
-        user_id = uuid.uuid4().hex
-        token = uuid.uuid4().hex
-        self.stub_url('PATCH',
-                      [self.path_prefix, 'users', user_id,
-                       self.collection_key, token],
-                      status_code=204)
-        self.manager.reset_password(user=user_id, reset_token=token)
-

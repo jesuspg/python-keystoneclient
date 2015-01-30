@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keystoneclient.v3.contrib.user_registration import registration, activation, resetpassword
+from keystoneclient.v3.contrib.user_registration import users, activation_key, token
 
 class UserRegistrationManager(object):
     def __init__(self, api):
-        self.registration = registration.RegistrationManager(api)
-        self.activation = activation.ActivationManager(api)
-        self.resetpassword = resetpassword.ResetPasswordManager(api)
+        self.users = users.UsersManager(api)
+        self.activation_key = activation_key.ActivationKeyManager(api)
+        self.token = token.TokenManager(api)

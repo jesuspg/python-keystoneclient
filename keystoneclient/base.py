@@ -368,7 +368,6 @@ class CrudManager(Manager):
     @filter_kwargs
     def update(self, **kwargs):
         url = self.build_url(dict_args_in_out=kwargs)
-
         return self._update(
             url,
             {self.key: kwargs},
