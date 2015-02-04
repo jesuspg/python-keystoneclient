@@ -44,11 +44,19 @@ class UsersManager(base.CrudManager):
                             log=not bool(password))
 
     def activate_user(self, user, activation_key):
-        base_url = self.base_url + '/activate/{0}'.format(base.getid(activation_key))
-        return super(UsersManager, self).update(base_url=base_url, 
-                                                user_id=base.getid(user))
+        url = self.base_url + '/activate/{0}/users/{1}'.format(
+                                                base.getid(activation_key),
+                                                base.getid(user))
+        return self._update(
+            url,
+            None,
+            self.key,
+            method='PATCH')
 
     def reset_password(self, user, reset_token):
-        base_url = self.base_url + '/reset_password/{0}'.format(base.getid(reset_token))
-        return super(UsersManager, self).update(base_url=base_url,
-                                                user_id=base.getid(user))
+        url = self.base_url + '/reset_password/{0}/users/{1}'.format(base.getid(reset_token), base.getid(user))
+        return self._update(
+            url,
+            None,
+            self.key,
+            method='PATCH')
