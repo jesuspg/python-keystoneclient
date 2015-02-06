@@ -31,54 +31,63 @@ def _password_session():
 keystone = fiwareclient()
 
 #Registrer User:
-new_user = keystone.user_registration.users.register_user(name='Test User',
-														  domain='default',
-														  password='test',
-														  email='user@test.com')
+if 0:
+	new_user = keystone.user_registration.users.register_user(name='Test User',
+															  domain='default',
+															  password='test',
+															  email='user@test.com')
 
-print ('\nUser activated? ')
-print new_user.enabled
+	print ('\nUser activated? ')
+	print new_user.enabled
 
 #Activate User
-activated_user = keystone.user_registration.users.activate_user(new_user.id, new_user.activation_key)
+if 0:
+	activated_user = keystone.user_registration.users.activate_user(new_user.id, new_user.activation_key)
 
-print ('\nUser activated? ')
-print activated_user.enabled
+	print ('\nUser activated? ')
+	print activated_user.enabled
 
 #Forgot Password
-token = keystone.user_registration.token.get_reset_token(new_user.id)
-print token
+if 0: 
+	token = keystone.user_registration.token.get_reset_token(new_user.id)
+	print token
 
-user_ref = {
-	'password' : 'newpassword',
-	'id' :  new_user.id,
-}
-user = keystone.user_registration.users.reset_password(user_ref, token.id)
-print user
+	user = keystone.user_registration.users.reset_password(new_user, token.id, 'newpassword')
+	print user
 
 #Delete created user and associated project
-keystone.users.delete(new_user.id)
-project = keystone.projects.find(name=new_user.name)
-keystone.projects.delete(project.id)
+if 0:
+	keystone.users.delete(new_user.id)
+	project = keystone.projects.find(name=new_user.name)
+	keystone.projects.delete(project.id)
 
 #New Activation Key
-user_reset = keystone.user_registration.users.register_user(name='Test User',
-														  domain='default',
-														  password='test',
-														  email='user@test.com')
-print ('\nUser activated? ')
-print user_reset.enabled
+# The new activation key does not work in these tests.
+if 1:
+	user_reset = keystone.user_registration.users.register_user(name='Test User',
+															  domain='default',
+															  password='test',
+															  email='user@test.com')
+	project = keystone.projects.find(name=user_reset.name)
+	print user_reset.id
+	print project.id
+	print ('\nUser activated? ')
+	print user_reset.enabled
 
-new_activation_key = keystone.user_registration.activation_key.new_activation_key(user_reset.id)
-print new_activation_key
+	print user_reset.activation_key
 
-activated_user = keystone.user_registration.users.activate_user(user_reset.id, new_activation_key.id)
+	new_activation_key = keystone.user_registration.activation_key.new_activation_key(user_reset.id)
+	print new_activation_key.id
+	print user_reset.activation_key
 
-print ('\nUser activated? ')
-print user_reset.enabled
+	activated_user = keystone.user_registration.users.activate_user(user_reset.id, new_activation_key.id)
+	print activated_user
 
-keystone.users.delete(user_reset.id)
-project = keystone.projects.find(name=user_reset.name)
-keystone.projects.delete(project.id)
+	print ('\nUser activated? ')
+	print user_reset.enabled
+
+	keystone.users.delete(user_reset.id)
+	# project = keystone.projects.find(name=user_reset.name)
+	keystone.projects.delete(project.id)
 
 
