@@ -17,6 +17,7 @@ import uuid
 from keystoneclient import exceptions
 from keystoneclient.tests.v3 import utils
 from keystoneclient.v3.contrib.fiware_roles import roles
+from keystoneclient.v3.contrib.fiware_roles import role_assignments
 from keystoneclient.v3.contrib.fiware_roles import permissions
 
 
@@ -39,57 +40,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         kwargs.setdefault('is_internal', False)
         return kwargs
 
-
-    # def test_list_roles_by_permission(self):
-    #     permission_id = uuid.uuid4().hex
-    #     ref_list = [self.new_ref(), self.new_ref()]
-
-    #     self.stub_entity('GET',
-    #                   parts=[self.path_prefix, 'permissions', permission_id, self.collection_key],
-    #                   entity=ref_list)
-
-    #     returned_list = self.manager.list(permission=permission_id)
-
-    #     self.assertEqual(len(ref_list), len(returned_list))
-    #     [self.assertIsInstance(r, self.model) for r in returned_list]
-
-    def test_list_roles_by_user(self):
-        user_id = uuid.uuid4().hex
-        ref_list = [self.new_ref(), self.new_ref()]
-        organization_id = uuid.uuid4().hex
-        self.stub_entity('GET',
-                      parts=[self.path_prefix, 'users', user_id, 
-                        'organizations', organization_id,
-                        self.collection_key],
-                      entity=ref_list)
-
-        returned_list = self.manager.list(user=user_id,
-                              organization=organization_id)
-
-        self.assertEqual(len(ref_list), len(returned_list))
-        for item in returned_list:
-            self.assertIsInstance(item, self.model)
-
-        # Test invalid args
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.list,
-                            user=user_id,
-                            organization=None)
-        self.assertRaises(exceptions.ValidationError,
-                            self.manager.list,
-                            user=None,
-                            organization=organization_id)
-
-    # def test_list_roles_by_user_and_permission(self):
-    #     user_id = uuid.uuid4().hex
-    #     permission_id = uuid.uuid4().hex
-    #     ref_list = [self.new_ref(), self.new_ref()]
-
-    #     self.assertRaises(exceptions.ValidationError,
-    #                       self.manager.list,
-    #                       user=user_id,
-    #                       permission=permission_id)
-
+    # ROLES-USER
     def test_add_role_to_user(self):
 
         user_id = uuid.uuid4().hex
@@ -103,6 +54,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
         self.manager.add_to_user(role=role_ref['id'], 
                               user=user_id,
                               organization=organization_id)
+
 
     def test_remove_role_from_user(self):
         user_id = uuid.uuid4().hex
@@ -118,7 +70,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                                  user=user_id,
                                  organization=organization_id)
 
-    def test_list_allowed_roles_to_assign(self):
+
+    def test_list_user_allowed_roles_to_assign(self):
       user_id = uuid.uuid4().hex
       organization_id = uuid.uuid4().hex
       allowed_roles_ref = {
@@ -132,12 +85,242 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                             'organizations', organization_id,
                             'roles/allowed'],
                       json=allowed_roles_ref)
-      allowed_roles = self.manager.list_allowed_roles_to_assign(user=user_id,
-                                                organization=organization_id)
+      allowed_roles = self.manager.list_user_allowed_roles_to_assign(
+        user=user_id, organization=organization_id)
 
       self.assertIsNotNone(allowed_roles)
       for item in allowed_roles['some_application']:
         self.assertIsInstance(item, self.model)
+
+
+    # ROLES-ORGANIZATIONS
+    def test_add_role_to_organization(self):
+        organization_id = uuid.uuid4().hex
+        role_ref = self.new_ref()
+        self.stub_url('PUT',
+                      [self.path_prefix, 'organizations', organization_id,
+                      self.collection_key, role_ref['id']],
+                      status_code=204)
+        self.manager.add_to_organization(role=role_ref['id'], 
+                                         organization=organization_id)
+
+
+    def test_remove_role_from_organization(self):
+        organization_id = uuid.uuid4().hex
+        role_ref = self.new_ref()
+        self.stub_url('DELETE',
+                      [self.path_prefix, 'organizations', organization_id,
+                      self.collection_key, role_ref['id']],
+                      status_code=204)
+
+        self.manager.remove_from_organization(role=role_ref['id'], 
+                                              organization=organization_id)
+
+
+    def test_list_organization_allowed_roles_to_assign(self):
+      organization_id = uuid.uuid4().hex
+      allowed_roles_ref = {
+        'some_application': [
+            self.new_ref(),
+            self.new_ref(),
+        ]
+      }
+      self.stub_url('GET',
+                    [self.path_prefix, 'organizations', organization_id,
+                    'roles/allowed'],
+                    json=allowed_roles_ref)
+      allowed_roles = self.manager.list_organization_allowed_roles_to_assign(
+        organization=organization_id)
+
+      self.assertIsNotNone(allowed_roles)
+      for item in allowed_roles['some_application']:
+        self.assertIsInstance(item, self.model)
+
+
+
+class RoleAssignmentsTests(utils.TestCase, utils.CrudTests):
+
+    def setUp(self):
+        super(RoleAssignmentsTests, self).setUp()
+        self.key = 'role_assignment'
+        self.collection_key = 'role_assignments'
+        self.model = role_assignments.RoleAssignment
+        self.manager = self.client.fiware_roles.role_assignments
+        self.USER_ASSIGNMENT_TEST_LIST = [{
+            'role_id': uuid.uuid4().hex,
+            'organization_id': uuid.uuid4().hex,
+            'user_id': uuid.uuid4().hex,
+            'application_id': uuid.uuid4().hex,
+        }]
+        self.ORGANIZATION_ASSIGNMENT_TEST_LIST = [{
+            'role_id': uuid.uuid4().hex,
+            'organization_id': uuid.uuid4().hex,
+            'application_id': uuid.uuid4().hex,
+        }]
+        self.path_prefix = EXTENSION_PATH
+
+
+    def _assert_returned_list(self, ref_list, returned_list):
+        self.assertEqual(len(ref_list), len(returned_list))
+        [self.assertIsInstance(r, self.model) for r in returned_list]
+
+
+    # ROLE-USER
+    def test_all_user_assignments_list(self):
+        ref_list = self.USER_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'users', self.collection_key],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_user_role_assignments()
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_organization_user_assignments(self):
+        ref_list = self.USER_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'users', self.collection_key,
+                          '?organization_id=%s' % self.TEST_TENANT_ID],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_user_role_assignments(
+            organization=self.TEST_TENANT_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'organization_id': self.TEST_TENANT_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_application_user_assignments(self):
+        ref_list = self.USER_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'users', self.collection_key,
+                          '?application_id=%s' % self.TEST_DOMAIN_ID],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_user_role_assignments(
+            application=self.TEST_DOMAIN_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'application_id': self.TEST_DOMAIN_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_user_user_assignments(self):
+        ref_list = self.USER_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'users', self.collection_key,
+                          '?user_id=%s' % self.TEST_USER_ID],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_user_role_assignments(
+            user=self.TEST_USER_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'user_id': self.TEST_USER_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_user_and_organization_user_assignments(self):
+        ref_list = self.USER_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'users', self.collection_key,
+                          '?organization_id=%s&user_id=%s' %
+                          (self.TEST_TENANT_ID, self.TEST_USER_ID)],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_user_role_assignments(
+            user=self.TEST_USER_ID, organization=self.TEST_TENANT_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'organization_id': self.TEST_TENANT_ID,
+                  'user_id': self.TEST_USER_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    #ROLE-ORGANIZATION
+    def test_all_organization_assignments_list(self):
+        ref_list = self.ORGANIZATION_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'organizations', self.collection_key],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_organization_role_assignments()
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_organization_organization_assignments(self):
+        ref_list = self.ORGANIZATION_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'organizations', self.collection_key,
+                          '?organization_id=%s' % self.TEST_TENANT_ID],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_organization_role_assignments(
+            organization=self.TEST_TENANT_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'organization_id': self.TEST_TENANT_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_application_organization_assignments(self):
+        ref_list = self.ORGANIZATION_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'organizations', self.collection_key,
+                          '?application_id=%s' % self.TEST_DOMAIN_ID],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_organization_role_assignments(
+            application=self.TEST_DOMAIN_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'application_id': self.TEST_DOMAIN_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_filter_by_application_and_organization_organization_assignments(self):
+        ref_list = self.ORGANIZATION_ASSIGNMENT_TEST_LIST
+        self.stub_entity('GET',
+                         [self.path_prefix, 'organizations', self.collection_key,
+                          '?organization_id=%s&application_id=%s' %
+                          (self.TEST_TENANT_ID, self.TEST_DOMAIN_ID)],
+                         entity=ref_list)
+
+        returned_list = self.manager.list_organization_role_assignments(
+            application=self.TEST_DOMAIN_ID, organization=self.TEST_TENANT_ID)
+        self._assert_returned_list(ref_list, returned_list)
+
+        kwargs = {'organization_id': self.TEST_TENANT_ID,
+                  'application_id': self.TEST_DOMAIN_ID}
+        self.assertQueryStringContains(**kwargs)
+
+
+    def test_create(self):
+        # Create not supported for role assignments
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.create)
+
+    def test_update(self):
+        # Update not supported for role assignments
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.update)
+
+    def test_delete(self):
+        # Delete not supported for role assignments
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.delete)
+
+    def test_get(self):
+        # Get not supported for role assignments
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.get)
+
+    def test_find(self):
+        # Find not supported for role assignments
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.find)
 
 
 class PermissionTests(utils.TestCase, utils.CrudTests):

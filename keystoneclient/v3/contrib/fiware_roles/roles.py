@@ -15,7 +15,6 @@
 import json
 
 from keystoneclient import base
-from keystoneclient import exceptions
 from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
 
 
@@ -32,74 +31,88 @@ class RoleManager(base.CrudManager):
     key = 'role'
     base_url = ROLES_PATH
 
-    def _require_user_and_organization(self, user, organization):
-        if (not user and organization) or (user and not organization):
-            msg = 'Specify both a user and an organization'
-            raise exceptions.ValidationError(msg)
-
-    # def _require_user_xor_permission(self, user, permission):
-    #     if user and permission:
-    #         msg = 'Specify either a user or permission, not both'
-    #         raise exceptions.ValidationError(msg)
-    #     elif not (user or permission):
-    #         msg = 'Must specify either a user or permission'
-    #         raise exceptions.ValidationError(msg)
-
     def create(self, name, is_internal=False, application=None, **kwargs):
-        return super(RoleManager, self).create(
-                                        name=name,
-                                        is_internal=is_internal,
-                                        application=application,
-                                        **kwargs)
+        return super(RoleManager, self).create(name=name,
+                                               is_internal=is_internal,
+                                               application=application,
+                                               **kwargs)
+    
+
     def get(self, role):
-        return super(RoleManager, self).get(
-                                    role_id=base.getid(role))
+        return super(RoleManager, self).get(role_id=base.getid(role))
+
 
     def update(self, role, name=None, is_internal=False, 
-                application=None, **kwargs):
-        return super(RoleManager, self).update(
-                                        role_id=base.getid(role),
-                                        name=name,
-                                        is_internal=is_internal,
-                                        application=application,
-                                        **kwargs)
-        
+               application=None, **kwargs):
+        return super(RoleManager, self).update(role_id=base.getid(role),
+                                               name=name,
+                                               is_internal=is_internal,
+                                               application=application,
+                                               **kwargs)
+   
+
     def delete(self, role):
         return super(RoleManager, self).delete(role_id=base.getid(role))
 
-    def list(self, user=None, organization=None, **kwargs):
-        self._require_user_and_organization(user, organization)
 
-        if user and organization:
-            base_url = self.base_url + '/users/%s/organizations/%s' \
-                % (base.getid(user), base.getid(organization))
-        else:
-            base_url = self.base_url
-
+    def list(self, **kwargs):
+        base_url = self.base_url
         return super(RoleManager, self).list(base_url=base_url, **kwargs)
 
+
+    # ROLE-USER
     def add_to_user(self, role, user, organization):
         base_url = self.base_url + '/users/%s/organizations/%s' \
             % (base.getid(user), base.getid(organization))
         
-        return super(RoleManager, self).put(
-                base_url=base_url,
-                role_id=base.getid(role))
+        return super(RoleManager, self).put(base_url=base_url,
+                                            role_id=base.getid(role))
+
 
     def remove_from_user(self, role, user, organization):
         base_url = self.base_url + '/users/%s/organizations/%s' \
             % (base.getid(user), base.getid(organization))
     
-        return super(RoleManager, self).delete(
-                base_url=base_url,
-                role_id=base.getid(role))
+        return super(RoleManager, self).delete(base_url=base_url,
+                                               role_id=base.getid(role))
 
-    def list_allowed_roles_to_assign(self, user, organization):
+
+    def list_user_allowed_roles_to_assign(self, user, organization):
         """Obtain a list of all the roles the user is allowed to assign
         for every application.
         """
         endpoint = self.base_url + '/users/%s/organizations/%s/roles/allowed' \
             % (base.getid(user), base.getid(organization))
+        resp, body = self.client.get(endpoint)
+        allowed_roles = json.loads(resp.content)
+        roles_as_resource = {}
+        for app in allowed_roles:
+            for role in allowed_roles[app]:
+                roles_as_resource[app] = roles_as_resource.get(app, [])
+                roles_as_resource[app].append(self.resource_class(self, role))
+        return roles_as_resource
+
+
+    def add_to_organization(self, role, organization):
+        base_url = self.base_url + '/organizations/{0}'.format(base.getid(organization))
+        
+        return super(RoleManager, self).put(base_url=base_url,
+                                            role_id=base.getid(role))
+
+
+    def remove_from_organization(self, role, organization):
+        base_url = self.base_url + '/organizations/{0}'.format(base.getid(organization))
+    
+        return super(RoleManager, self).delete(base_url=base_url,
+                                               role_id=base.getid(role))
+
+
+    def list_organization_allowed_roles_to_assign(self, organization):
+        """Obtain a list of all the roles the user is allowed to assign
+        for every application.
+        """
+        endpoint = self.base_url + '/organizations/{0}/roles/allowed'.format(
+            base.getid(organization))
         resp, body = self.client.get(endpoint)
         allowed_roles = json.loads(resp.content)
         roles_as_resource = {}

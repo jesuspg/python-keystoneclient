@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from keystoneclient.v3.contrib.fiware_roles import roles
+from keystoneclient.v3.contrib.fiware_roles import role_assignments
 from keystoneclient.v3.contrib.fiware_roles import permissions
 
 
@@ -20,4 +21,5 @@ class FiwareRolesManager(object):
      def __init__(self, api):
          self.roles = roles.RoleManager(api)
          self.permissions = permissions.PermissionManager(api)
+         self.role_assignments = role_assignments.RoleAssignmentManager(api)
   
