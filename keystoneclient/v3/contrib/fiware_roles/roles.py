@@ -32,10 +32,11 @@ class RoleManager(base.CrudManager):
     base_url = ROLES_PATH
 
     def create(self, name, is_internal=False, application=None, **kwargs):
-        return super(RoleManager, self).create(name=name,
-                                               is_internal=is_internal,
-                                               application=base.getid(application),
-                                               **kwargs)
+        return super(RoleManager, self).create(
+            name=name,
+            is_internal=is_internal,
+            application=base.getid(application),
+            **kwargs)
     
 
     def get(self, role):
