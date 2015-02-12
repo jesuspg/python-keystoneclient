@@ -34,7 +34,7 @@ class RoleManager(base.CrudManager):
     def create(self, name, is_internal=False, application=None, **kwargs):
         return super(RoleManager, self).create(name=name,
                                                is_internal=is_internal,
-                                               application=application,
+                                               application=base.getid(application),
                                                **kwargs)
     
 
@@ -47,7 +47,7 @@ class RoleManager(base.CrudManager):
         return super(RoleManager, self).update(role_id=base.getid(role),
                                                name=name,
                                                is_internal=is_internal,
-                                               application=application,
+                                               application=base.getid(application),
                                                **kwargs)
    
 
@@ -61,17 +61,19 @@ class RoleManager(base.CrudManager):
 
 
     # ROLE-USER
-    def add_to_user(self, role, user, organization):
-        base_url = self.base_url + '/users/%s/organizations/%s' \
-            % (base.getid(user), base.getid(organization))
+    def add_to_user(self, role, user, organization, application):
+        base_url = (self.base_url + '/users/{0}/organizations/{1}/applications/{2}'
+            ).format(base.getid(user), base.getid(organization), 
+            base.getid(application))
         
         return super(RoleManager, self).put(base_url=base_url,
                                             role_id=base.getid(role))
 
 
-    def remove_from_user(self, role, user, organization):
-        base_url = self.base_url + '/users/%s/organizations/%s' \
-            % (base.getid(user), base.getid(organization))
+    def remove_from_user(self, role, user, organization, application):
+        base_url = (self.base_url + '/users/{0}/organizations/{1}/applications/{2}'
+            ).format(base.getid(user), base.getid(organization), 
+            base.getid(application))
     
         return super(RoleManager, self).delete(base_url=base_url,
                                                role_id=base.getid(role))
@@ -81,8 +83,8 @@ class RoleManager(base.CrudManager):
         """Obtain a list of all the roles the user is allowed to assign
         for every application.
         """
-        endpoint = self.base_url + '/users/%s/organizations/%s/roles/allowed' \
-            % (base.getid(user), base.getid(organization))
+        endpoint = (self.base_url + '/users/{0}/organizations/{1}/roles/allowed'
+            ).format(base.getid(user), base.getid(organization))
         resp, body = self.client.get(endpoint)
         allowed_roles = json.loads(resp.content)
         roles_as_resource = {}
@@ -93,16 +95,18 @@ class RoleManager(base.CrudManager):
         return roles_as_resource
 
 
-    def add_to_organization(self, role, organization):
-        base_url = self.base_url + '/organizations/{0}'.format(base.getid(organization))
+    # ROLES-ORGANIZATIONS
+    def add_to_organization(self, role, organization, application):
+        base_url = (self.base_url + '/organizations/{0}/applications/{1}'
+            ).format(base.getid(organization), base.getid(application))
         
         return super(RoleManager, self).put(base_url=base_url,
                                             role_id=base.getid(role))
 
 
-    def remove_from_organization(self, role, organization):
-        base_url = self.base_url + '/organizations/{0}'.format(base.getid(organization))
-    
+    def remove_from_organization(self, role, organization, application):
+        base_url = (self.base_url + '/organizations/{0}/applications/{1}'
+            ).format(base.getid(organization), base.getid(application))
         return super(RoleManager, self).delete(base_url=base_url,
                                                role_id=base.getid(role))
 

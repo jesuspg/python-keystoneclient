@@ -42,33 +42,38 @@ class RoleTests(utils.TestCase, utils.CrudTests):
 
     # ROLES-USER
     def test_add_role_to_user(self):
-
         user_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         organization_id = uuid.uuid4().hex
+        app_id = uuid.uuid4().hex
         self.stub_url('PUT',
                       [self.path_prefix, 'users', user_id,
                       'organizations', organization_id,
+                      'applications', app_id,
                        self.collection_key, role_ref['id']],
                        status_code=204)
         self.manager.add_to_user(role=role_ref['id'], 
                               user=user_id,
-                              organization=organization_id)
+                              organization=organization_id,
+                              application=app_id)
 
 
     def test_remove_role_from_user(self):
         user_id = uuid.uuid4().hex
         role_ref = self.new_ref()
         organization_id = uuid.uuid4().hex
+        app_id = uuid.uuid4().hex
         self.stub_url('DELETE',
-                        [self.path_prefix, 'users', user_id,
-                         'organizations', organization_id,
-                         self.collection_key, role_ref['id']],
-                         status_code=204)
+                      [self.path_prefix, 'users', user_id,
+                       'organizations', organization_id,
+                       'applications', app_id,
+                        self.collection_key, role_ref['id']],
+                      status_code=204)
 
         self.manager.remove_from_user(role=role_ref['id'], 
                                  user=user_id,
-                                 organization=organization_id)
+                                 organization=organization_id,
+                                 application=app_id)
 
 
     def test_list_user_allowed_roles_to_assign(self):
@@ -97,24 +102,30 @@ class RoleTests(utils.TestCase, utils.CrudTests):
     def test_add_role_to_organization(self):
         organization_id = uuid.uuid4().hex
         role_ref = self.new_ref()
+        app_id = uuid.uuid4().hex
         self.stub_url('PUT',
                       [self.path_prefix, 'organizations', organization_id,
+                      'applications', app_id,
                       self.collection_key, role_ref['id']],
                       status_code=204)
         self.manager.add_to_organization(role=role_ref['id'], 
-                                         organization=organization_id)
+                                         organization=organization_id,
+                                         application=app_id)
 
 
     def test_remove_role_from_organization(self):
         organization_id = uuid.uuid4().hex
         role_ref = self.new_ref()
+        app_id = uuid.uuid4().hex
         self.stub_url('DELETE',
                       [self.path_prefix, 'organizations', organization_id,
+                      'applications', app_id,
                       self.collection_key, role_ref['id']],
                       status_code=204)
 
         self.manager.remove_from_organization(role=role_ref['id'], 
-                                              organization=organization_id)
+                                              organization=organization_id,
+                                              application=app_id)
 
 
     def test_list_organization_allowed_roles_to_assign(self):
