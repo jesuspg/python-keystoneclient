@@ -88,12 +88,13 @@ class RoleManager(base.CrudManager):
             ).format(base.getid(user), base.getid(organization))
         resp, body = self.client.get(endpoint)
         allowed_roles = json.loads(resp.content)
-        roles_as_resource = {}
-        for app in allowed_roles:
-            for role in allowed_roles[app]:
-                roles_as_resource[app] = roles_as_resource.get(app, [])
-                roles_as_resource[app].append(self.resource_class(self, role))
-        return roles_as_resource
+        return allowed_roles
+        # roles_as_resource = {}
+        # for app in allowed_roles:
+        #     for role in allowed_roles[app]:
+        #         roles_as_resource[app] = roles_as_resource.get(app, [])
+        #         roles_as_resource[app].append(self.resource_class(self, role))
+        # return roles_as_resource
 
 
     # ROLES-ORGANIZATIONS
@@ -120,11 +121,12 @@ class RoleManager(base.CrudManager):
             base.getid(organization))
         resp, body = self.client.get(endpoint)
         allowed_roles = json.loads(resp.content)
-        roles_as_resource = {}
-        for app in allowed_roles:
-            for role in allowed_roles[app]:
-                roles_as_resource[app] = roles_as_resource.get(app, [])
-                roles_as_resource[app].append(self.resource_class(self, role))
-        return roles_as_resource
+        return allowed_roles
+        # roles_as_resource = {}
+        # for app in allowed_roles:
+        #     for role in allowed_roles[app]:
+        #         roles_as_resource[app] = roles_as_resource.get(app, [])
+        #         roles_as_resource[app].append(self.resource_class(self, role))
+        # return roles_as_resource
 
     

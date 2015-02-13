@@ -81,8 +81,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
       organization_id = uuid.uuid4().hex
       allowed_roles_ref = {
         'some_application': [
-            self.new_ref(),
-            self.new_ref(),
+            uuid.uuid4().hex,
+            uuid.uuid4().hex,
         ]
       }
       self.stub_url('GET',
@@ -93,9 +93,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
       allowed_roles = self.manager.list_user_allowed_roles_to_assign(
         user=user_id, organization=organization_id)
 
-      self.assertIsNotNone(allowed_roles)
-      for item in allowed_roles['some_application']:
-        self.assertIsInstance(item, self.model)
+      self.assertEqual(2, len(allowed_roles['some_application']))
 
 
     # ROLES-ORGANIZATIONS
@@ -132,8 +130,8 @@ class RoleTests(utils.TestCase, utils.CrudTests):
       organization_id = uuid.uuid4().hex
       allowed_roles_ref = {
         'some_application': [
-            self.new_ref(),
-            self.new_ref(),
+            uuid.uuid4().hex,
+            uuid.uuid4().hex,
         ]
       }
       self.stub_url('GET',
@@ -143,9 +141,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
       allowed_roles = self.manager.list_organization_allowed_roles_to_assign(
         organization=organization_id)
 
-      self.assertIsNotNone(allowed_roles)
-      for item in allowed_roles['some_application']:
-        self.assertIsInstance(item, self.model)
+      self.assertEqual(2, len(allowed_roles['some_application']))
 
 
 
