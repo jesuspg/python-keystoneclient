@@ -87,7 +87,7 @@ class RoleManager(base.CrudManager):
         endpoint = (self.base_url + '/users/{0}/organizations/{1}/roles/allowed'
             ).format(base.getid(user), base.getid(organization))
         resp, body = self.client.get(endpoint)
-        allowed_roles = json.loads(resp.content)
+        allowed_roles = json.loads(resp.content)['allowed_roles']
         return allowed_roles
         # roles_as_resource = {}
         # for app in allowed_roles:
@@ -120,7 +120,7 @@ class RoleManager(base.CrudManager):
         endpoint = self.base_url + '/organizations/{0}/roles/allowed'.format(
             base.getid(organization))
         resp, body = self.client.get(endpoint)
-        allowed_roles = json.loads(resp.content)
+        allowed_roles = json.loads(resp.content)['allowed_roles']
         return allowed_roles
         # roles_as_resource = {}
         # for app in allowed_roles:

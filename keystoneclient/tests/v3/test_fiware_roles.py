@@ -80,10 +80,12 @@ class RoleTests(utils.TestCase, utils.CrudTests):
       user_id = uuid.uuid4().hex
       organization_id = uuid.uuid4().hex
       allowed_roles_ref = {
-        'some_application': [
-            uuid.uuid4().hex,
-            uuid.uuid4().hex,
-        ]
+        'allowed_roles': {
+            'some_application': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+          ]
+        }
       }
       self.stub_url('GET',
                       [self.path_prefix, 'users', user_id,
@@ -129,10 +131,12 @@ class RoleTests(utils.TestCase, utils.CrudTests):
     def test_list_organization_allowed_roles_to_assign(self):
       organization_id = uuid.uuid4().hex
       allowed_roles_ref = {
-        'some_application': [
-            uuid.uuid4().hex,
-            uuid.uuid4().hex,
-        ]
+        'allowed_roles': {
+            'some_application': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+          ]
+        }
       }
       self.stub_url('GET',
                     [self.path_prefix, 'organizations', organization_id,
