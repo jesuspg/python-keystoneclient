@@ -16,6 +16,7 @@ import uuid
 
 from keystoneclient import exceptions
 from keystoneclient.tests.v3 import utils
+from keystoneclient.v3.contrib.fiware_roles import allowed
 from keystoneclient.v3.contrib.fiware_roles import roles
 from keystoneclient.v3.contrib.fiware_roles import role_assignments
 from keystoneclient.v3.contrib.fiware_roles import permissions
@@ -76,26 +77,7 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                                  application=app_id)
 
 
-    def test_list_user_allowed_roles_to_assign(self):
-      user_id = uuid.uuid4().hex
-      organization_id = uuid.uuid4().hex
-      allowed_roles_ref = {
-        'allowed_roles': {
-            'some_application': [
-                uuid.uuid4().hex,
-                uuid.uuid4().hex,
-          ]
-        }
-      }
-      self.stub_url('GET',
-                      [self.path_prefix, 'users', user_id,
-                            'organizations', organization_id,
-                            'roles/allowed'],
-                      json=allowed_roles_ref)
-      allowed_roles = self.manager.list_user_allowed_roles_to_assign(
-        user=user_id, organization=organization_id)
 
-      self.assertEqual(2, len(allowed_roles['some_application']))
 
 
     # ROLES-ORGANIZATIONS
@@ -128,25 +110,90 @@ class RoleTests(utils.TestCase, utils.CrudTests):
                                               application=app_id)
 
 
-    def test_list_organization_allowed_roles_to_assign(self):
-      organization_id = uuid.uuid4().hex
-      allowed_roles_ref = {
+class AllowedTests(utils.TestCase):
+
+    def setUp(self):
+        super(AllowedTests, self).setUp()
+        self.manager = self.client.fiware_roles.allowed
+        self.path_prefix = EXTENSION_PATH
+
+    def test_list_user_allowed_roles_to_assign(self):
+        user_id = uuid.uuid4().hex
+        organization_id = uuid.uuid4().hex
+        allowed_roles_ref = {
         'allowed_roles': {
             'some_application': [
                 uuid.uuid4().hex,
                 uuid.uuid4().hex,
           ]
         }
-      }
-      self.stub_url('GET',
+        }
+        self.stub_url('GET',
+                      [self.path_prefix, 'users', user_id,
+                            'organizations', organization_id,
+                            'roles/allowed'],
+                      json=allowed_roles_ref)
+        allowed_roles = self.manager.list_user_allowed_roles_to_assign(
+            user=user_id, organization=organization_id)
+
+        self.assertEqual(2, len(allowed_roles['some_application']))
+
+    def test_list_organization_allowed_roles_to_assign(self):
+        organization_id = uuid.uuid4().hex
+        allowed_roles_ref = {
+        'allowed_roles': {
+            'some_application': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+          ]
+        }
+        }
+        self.stub_url('GET',
                     [self.path_prefix, 'organizations', organization_id,
                     'roles/allowed'],
                     json=allowed_roles_ref)
-      allowed_roles = self.manager.list_organization_allowed_roles_to_assign(
-        organization=organization_id)
+        allowed_roles = self.manager.list_organization_allowed_roles_to_assign(
+            organization=organization_id)
 
-      self.assertEqual(2, len(allowed_roles['some_application']))
+        self.assertEqual(2, len(allowed_roles['some_application']))
 
+    def test_list_user_allowed_applications_to_manage(self):
+        user_id = uuid.uuid4().hex
+        organization_id = uuid.uuid4().hex
+        allowed_applications_ref = {
+            'allowed_applications': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+            ]
+        }
+        self.stub_url('GET',
+                      [self.path_prefix, 'users', user_id,
+                            'organizations', organization_id,
+                            'applications/allowed'],
+                      json=allowed_applications_ref)
+        allowed_applications = self.manager.list_user_allowed_applications_to_manage(
+            user=user_id, organization=organization_id)
+
+        self.assertEqual(2, len(allowed_applications))
+
+    def test_list_organization_allowed_applications_to_manage(self):
+        organization_id = uuid.uuid4().hex
+        allowed_applications_ref = {
+            'allowed_applications': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+            ]
+        }
+        self.stub_url('GET',
+                      [self.path_prefix,
+                       'organizations', organization_id,
+                       'applications/allowed'],
+                      json=allowed_applications_ref)
+        allowed_applications = \
+            self.manager.list_organization_allowed_applications_to_manage(
+            organization=organization_id)
+
+        self.assertEqual(2, len(allowed_applications))
 
 
 class RoleAssignmentsTests(utils.TestCase, utils.CrudTests):

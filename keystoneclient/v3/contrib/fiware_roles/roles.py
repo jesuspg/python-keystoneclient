@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 
 from keystoneclient import base
 from keystoneclient.v3.contrib.fiware_roles.utils import ROLES_PATH
@@ -79,24 +78,6 @@ class RoleManager(base.CrudManager):
         return super(RoleManager, self).delete(base_url=base_url,
                                                role_id=base.getid(role))
 
-
-    def list_user_allowed_roles_to_assign(self, user, organization):
-        """Obtain a list of all the roles the user is allowed to assign
-        for every application.
-        """
-        endpoint = (self.base_url + '/users/{0}/organizations/{1}/roles/allowed'
-            ).format(base.getid(user), base.getid(organization))
-        resp, body = self.client.get(endpoint)
-        allowed_roles = json.loads(resp.content)['allowed_roles']
-        return allowed_roles
-        # roles_as_resource = {}
-        # for app in allowed_roles:
-        #     for role in allowed_roles[app]:
-        #         roles_as_resource[app] = roles_as_resource.get(app, [])
-        #         roles_as_resource[app].append(self.resource_class(self, role))
-        # return roles_as_resource
-
-
     # ROLES-ORGANIZATIONS
     def add_to_organization(self, role, organization, application):
         base_url = (self.base_url + '/organizations/{0}/applications/{1}'
@@ -110,23 +91,4 @@ class RoleManager(base.CrudManager):
         base_url = (self.base_url + '/organizations/{0}/applications/{1}'
             ).format(base.getid(organization), base.getid(application))
         return super(RoleManager, self).delete(base_url=base_url,
-                                               role_id=base.getid(role))
-
-
-    def list_organization_allowed_roles_to_assign(self, organization):
-        """Obtain a list of all the roles the user is allowed to assign
-        for every application.
-        """
-        endpoint = self.base_url + '/organizations/{0}/roles/allowed'.format(
-            base.getid(organization))
-        resp, body = self.client.get(endpoint)
-        allowed_roles = json.loads(resp.content)['allowed_roles']
-        return allowed_roles
-        # roles_as_resource = {}
-        # for app in allowed_roles:
-        #     for role in allowed_roles[app]:
-        #         roles_as_resource[app] = roles_as_resource.get(app, [])
-        #         roles_as_resource[app].append(self.resource_class(self, role))
-        # return roles_as_resource
-
-    
+                                               role_id=base.getid(role))    
