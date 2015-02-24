@@ -31,12 +31,12 @@ class UsersManager(base.CrudManager):
 
 
     def register_user(self, name, domain=None, password=None,
-                      email=None, description=None, **kwargs):
+                      username=None, description=None, **kwargs):
 
         user_data = base.filter_none(name=name,
                                      domain_id=base.getid(domain),
                                      password=password,
-                                     email=email,
+                                     username=username,
                                      description=description,
                                      **kwargs)
 
