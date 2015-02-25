@@ -195,6 +195,44 @@ class AllowedTests(utils.TestCase):
 
         self.assertEqual(2, len(allowed_applications))
 
+    def test_list_user_allowed_applications_to_manage_roles(self):
+        user_id = uuid.uuid4().hex
+        organization_id = uuid.uuid4().hex
+        allowed_applications_ref = {
+            'allowed_applications': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+            ]
+        }
+        self.stub_url('GET',
+                      [self.path_prefix, 'users', user_id,
+                            'organizations', organization_id,
+                            'applications/allowed_roles'],
+                      json=allowed_applications_ref)
+        allowed_applications = self.manager.list_user_allowed_applications_to_manage_roles(
+            user=user_id, organization=organization_id)
+
+        self.assertEqual(2, len(allowed_applications))
+
+    def test_list_organization_allowed_applications_to_manage_roles(self):
+        organization_id = uuid.uuid4().hex
+        allowed_applications_ref = {
+            'allowed_applications': [
+                uuid.uuid4().hex,
+                uuid.uuid4().hex,
+            ]
+        }
+        self.stub_url('GET',
+                      [self.path_prefix,
+                       'organizations', organization_id,
+                       'applications/allowed_roles'],
+                      json=allowed_applications_ref)
+        allowed_applications = \
+            self.manager.list_organization_allowed_applications_to_manage_roles(
+            organization=organization_id)
+
+        self.assertEqual(2, len(allowed_applications))
+
 
 class RoleAssignmentsTests(utils.TestCase, utils.CrudTests):
 

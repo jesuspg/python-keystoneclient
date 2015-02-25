@@ -64,3 +64,21 @@ class AllowedManager(base.Manager):
         resp, body = self.client.get(endpoint)
         allowed_applications = json.loads(resp.content)['allowed_applications']
         return allowed_applications
+
+    def list_user_allowed_applications_to_manage_roles(self, user, organization):
+        """Obtain a list of all the applications the user is allowed to manage.
+        """
+        endpoint = (self.base_url + '/users/{0}/organizations/{1}/applications/allowed_roles'
+            ).format(base.getid(user), base.getid(organization))
+        resp, body = self.client.get(endpoint)
+        allowed_applications = json.loads(resp.content)['allowed_applications']
+        return allowed_applications
+
+    def list_organization_allowed_applications_to_manage_roles(self, organization):
+        """Obtain a list of all the applications the user is allowed to manage.
+        """
+        endpoint = self.base_url + '/organizations/{0}/applications/allowed_roles'.format(
+            base.getid(organization))
+        resp, body = self.client.get(endpoint)
+        allowed_applications = json.loads(resp.content)['allowed_applications']
+        return allowed_applications
