@@ -54,7 +54,8 @@ class UsersManager(base.CrudManager):
             method='PATCH')
 
     def reset_password(self, user, reset_token, new_password):
-        url = self.base_url + '/reset_password/{0}/users/{1}'.format(base.getid(reset_token),user.id)
+        url = self.base_url + '/reset_password/{0}/users/{1}'.format(
+            base.getid(reset_token), base.getid(user))
         body = {
             'user' : {
                 'password' : new_password,

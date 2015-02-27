@@ -62,11 +62,14 @@ class UsersTests(utils.TestCase):
     def test_reset_password(self):
         user_id = uuid.uuid4().hex
         token = uuid.uuid4().hex
+        password = uuid.uuid4().hex
         self.stub_url('PATCH',
                       [self.path_prefix, 'reset_password', token,
                        self.collection_key, user_id],
                       status_code=204)
-        self.manager.reset_password(user=user_id, reset_token=token)
+        self.manager.reset_password(user=user_id, 
+                                    reset_token=token, 
+                                    new_password=password)
 
 class ActivationKeyTests(utils.TestCase):
 
