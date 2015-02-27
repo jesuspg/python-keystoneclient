@@ -10,9 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from keystoneclient import access
 from keystoneclient import auth
 from keystoneclient import base
 from keystoneclient import exceptions
+from keystoneclient.i18n import _
 from keystoneclient import utils
 
 
@@ -45,7 +47,8 @@ class TokenManager(base.Manager):
             params = {"auth": {"passwordCredentials": {"username": username,
                                                        "password": password}}}
         else:
-            raise ValueError('A username and password or token is required.')
+            raise ValueError(
+                _('A username and password or token is required.'))
         if tenant_id:
             params['auth']['tenantId'] = tenant_id
         elif tenant_name:
@@ -70,3 +73,44 @@ class TokenManager(base.Manager):
 
     def endpoints(self, token):
         return self._get("/tokens/%s/endpoints" % base.getid(token), "token")
+
+    def validate(self, token):
+        """Validate a token.
+
+        :param token: Token to be validated.
+
+        :rtype: :py:class:`.Token`
+
+        """
+        return self._get('/tokens/%s' % base.getid(token), 'access')
+
+    def validate_access_info(self, token):
+        """Validate a token.
+
+        :param token: Token to be validated. This can be an instance of
+                      :py:class:`keystoneclient.access.AccessInfo` or a string
+                      token_id.
+
+        :rtype: :py:class:`keystoneclient.access.AccessInfoV2`
+
+        """
+
+        def calc_id(token):
+            if isinstance(token, access.AccessInfo):
+                return token.auth_token
+            return base.getid(token)
+
+        url = '/tokens/%s' % calc_id(token)
+        resp, body = self.client.get(url)
+        access_info = access.AccessInfo.factory(resp=resp, body=body)
+        return access_info
+
+    def get_revoked(self):
+        """Returns the revoked tokens response.
+
+        The response will be a dict containing 'signed' which is a CMS-encoded
+        document.
+
+        """
+        resp, body = self.client.get('/tokens/revoked')
+        return body

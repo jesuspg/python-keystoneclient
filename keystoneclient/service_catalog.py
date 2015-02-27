@@ -21,6 +21,7 @@ import abc
 import six
 
 from keystoneclient import exceptions
+from keystoneclient.i18n import _
 from keystoneclient import utils
 
 
@@ -36,7 +37,7 @@ class ServiceCatalog(object):
         elif ServiceCatalogV2.is_valid(resource_dict):
             return ServiceCatalogV2(resource_dict, region_name)
         else:
-            raise NotImplementedError('Unrecognized auth response')
+            raise NotImplementedError(_('Unrecognized auth response'))
 
     def __init__(self, region_name=None):
         self._region_name = region_name
@@ -47,6 +48,9 @@ class ServiceCatalog(object):
         # directly is deprecated. It should instead be provided as a parameter
         # to calls made to the service_catalog. Provide appropriate warning.
         return self._region_name
+
+    def _get_endpoint_region(self, endpoint):
+        return endpoint.get('region_id') or endpoint.get('region')
 
     @abc.abstractmethod
     def get_token(self):
@@ -123,15 +127,16 @@ class ServiceCatalog(object):
                     if service_name != sn:
                         continue
 
-            sc[st] = []
+            endpoints = sc.setdefault(st, [])
 
             for endpoint in service.get('endpoints', []):
                 if (endpoint_type and not
                         self._is_endpoint_type_match(endpoint, endpoint_type)):
                     continue
-                if region_name and region_name != endpoint.get('region'):
+                if (region_name and
+                        region_name != self._get_endpoint_region(endpoint)):
                     continue
-                sc[st].append(endpoint)
+                endpoints.append(endpoint)
 
         return sc
 
@@ -208,7 +213,7 @@ class ServiceCatalog(object):
 
         """
         if not self.get_data():
-            raise exceptions.EmptyCatalog('The service catalog is empty.')
+            raise exceptions.EmptyCatalog(_('The service catalog is empty.'))
 
         urls = self.get_urls(attr=attr,
                              filter_value=filter_value,
@@ -222,12 +227,30 @@ class ServiceCatalog(object):
         except Exception:
             pass
 
-        msg = '%s endpoint for %s service' % (endpoint_type, service_type)
-        if service_name:
-            msg += ' named %s' % service_name
-        if region_name:
-            msg += ' in %s region' % region_name
-        msg += ' not found'
+        if service_name and region_name:
+            msg = (_('%(endpoint_type)s endpoint for %(service_type)s service '
+                     'named %(service_name)s in %(region_name)s region not '
+                     'found') %
+                   {'endpoint_type': endpoint_type,
+                    'service_type': service_type, 'service_name': service_name,
+                    'region_name': region_name})
+        elif service_name:
+            msg = (_('%(endpoint_type)s endpoint for %(service_type)s service '
+                     'named %(service_name)s not found') %
+                   {'endpoint_type': endpoint_type,
+                    'service_type': service_type,
+                    'service_name': service_name})
+        elif region_name:
+            msg = (_('%(endpoint_type)s endpoint for %(service_type)s service '
+                     'in %(region_name)s region not found') %
+                   {'endpoint_type': endpoint_type,
+                    'service_type': service_type, 'region_name': region_name})
+        else:
+            msg = (_('%(endpoint_type)s endpoint for %(service_type)s service '
+                     'not found') %
+                   {'endpoint_type': endpoint_type,
+                    'service_type': service_type})
+
         raise exceptions.EndpointNotFound(msg)
 
     @abc.abstractmethod

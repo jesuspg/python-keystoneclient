@@ -13,19 +13,21 @@
 import abc
 import logging
 
-from oslo.config import cfg
+from oslo_config import cfg
 import six
 import six.moves.urllib.parse as urlparse
 
 from keystoneclient import _discover
 from keystoneclient.auth.identity import base
 from keystoneclient import exceptions
+from keystoneclient.i18n import _, _LW
+
 
 LOG = logging.getLogger(__name__)
 
 
 def get_options():
-    return base.get_options() + [
+    return [
         cfg.StrOpt('domain-id', help='Domain ID to scope to'),
         cfg.StrOpt('domain-name', help='Domain name to scope to'),
         cfg.StrOpt('tenant-id', help='Tenant ID to scope to'),
@@ -79,7 +81,8 @@ class BaseGenericPlugin(base.BaseIdentityPlugin):
         params then it should return it. If not return None and then another
         call will be made with other available URLs.
 
-        :param Session session: A session object.
+        :param session: A session object.
+        :type session: keystoneclient.session.Session
         :param tuple version: A tuple of the API version at the URL.
         :param string url: The base URL for this version.
         :param string raw_status: The status that was in the discovery field.
@@ -127,9 +130,9 @@ class BaseGenericPlugin(base.BaseIdentityPlugin):
         except (exceptions.DiscoveryFailure,
                 exceptions.HTTPError,
                 exceptions.ConnectionError):
-            LOG.warn('Discovering versions from the identity service failed '
-                     'when creating the password plugin. Attempting to '
-                     'determine version from URL.')
+            LOG.warn(_LW('Discovering versions from the identity service '
+                         'failed when creating the password plugin. '
+                         'Attempting to determine version from URL.'))
 
             url_parts = urlparse.urlparse(self.auth_url)
             path = url_parts.path.lower()
@@ -163,7 +166,7 @@ class BaseGenericPlugin(base.BaseIdentityPlugin):
             return plugin
 
         # so there were no URLs that i could use for auth of any version.
-        msg = 'Could not determine a suitable URL for the plugin'
+        msg = _('Could not determine a suitable URL for the plugin')
         raise exceptions.DiscoveryFailure(msg)
 
     def get_auth_ref(self, session, **kwargs):

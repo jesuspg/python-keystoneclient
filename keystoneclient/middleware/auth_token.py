@@ -16,6 +16,12 @@
 """
 TOKEN-BASED AUTH MIDDLEWARE
 
+.. warning::
+
+  This module is DEPRECATED. The auth_token middleware has been moved to the
+  `keystonemiddleware repository
+  <http://docs.openstack.org/developer/keystonemiddleware/>`_.
+
 This WSGI component:
 
 * Verifies that incoming client requests have valid tokens by validating
@@ -25,9 +31,6 @@ This WSGI component:
   component (usually the OpenStack service)
 * Collects and forwards identity information based on a valid token
   such as user name, tenant, etc
-
-Refer to: http://docs.openstack.org/developer/python-keystoneclient/
-middlewarearchitecture.html
 
 HEADERS
 -------
@@ -154,9 +157,9 @@ import tempfile
 import time
 
 import netaddr
-from oslo.config import cfg
-from oslo.serialization import jsonutils
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_serialization import jsonutils
+from oslo_utils import timeutils
 import requests
 import six
 from six.moves import urllib
@@ -339,7 +342,7 @@ LIST_OF_VERSIONS_TO_ATTEMPT = ['v2.0', 'v3.0']
 CACHE_KEY_TEMPLATE = 'tokens/%s'
 
 
-class BIND_MODE:
+class BIND_MODE(object):
     DISABLED = 'disabled'
     PERMISSIVE = 'permissive'
     STRICT = 'strict'

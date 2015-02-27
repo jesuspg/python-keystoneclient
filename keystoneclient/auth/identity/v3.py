@@ -13,18 +13,35 @@
 import abc
 import logging
 
-from oslo.config import cfg
+from oslo_config import cfg
 import six
 
 from keystoneclient import access
 from keystoneclient.auth.identity import base
 from keystoneclient import exceptions
+from keystoneclient.i18n import _
 from keystoneclient import utils
 
 _logger = logging.getLogger(__name__)
 
 
 class Auth(base.BaseIdentityPlugin):
+    """Identity V3 Authentication Plugin.
+
+    :param string auth_url: Identity service endpoint for authentication.
+    :param list auth_methods: A collection of methods to authenticate with.
+    :param string trust_id: Trust ID for trust scoping.
+    :param string domain_id: Domain ID for domain scoping.
+    :param string domain_name: Domain name for domain scoping.
+    :param string project_id: Project ID for project scoping.
+    :param string project_name: Project name for project scoping.
+    :param string project_domain_id: Project's domain ID for project.
+    :param string project_domain_name: Project's domain name for project.
+    :param bool reauthenticate: Allow fetching a new token if the current one
+                                is going to expire. (optional) default True
+    :param bool include_catalog: Include the service catalog in the returned
+                                 token. (optional) default True.
+    """
 
     @utils.positional()
     def __init__(self, auth_url, auth_methods,
@@ -35,23 +52,8 @@ class Auth(base.BaseIdentityPlugin):
                  project_name=None,
                  project_domain_id=None,
                  project_domain_name=None,
-                 reauthenticate=True):
-        """Construct an Identity V3 Authentication Plugin.
-
-        :param string auth_url: Identity service endpoint for authentication.
-        :param list auth_methods: A collection of methods to authenticate with.
-        :param string trust_id: Trust ID for trust scoping.
-        :param string domain_id: Domain ID for domain scoping.
-        :param string domain_name: Domain name for domain scoping.
-        :param string project_id: Project ID for project scoping.
-        :param string project_name: Project name for project scoping.
-        :param string project_domain_id: Project's domain ID for project.
-        :param string project_domain_name: Project's domain name for project.
-        :param bool reauthenticate: Allow fetching a new token if the current
-                                    one is going to expire.
-                                    (optional) default True
-        """
-
+                 reauthenticate=True,
+                 include_catalog=True):
         super(Auth, self).__init__(auth_url=auth_url,
                                    reauthenticate=reauthenticate)
 
@@ -63,6 +65,7 @@ class Auth(base.BaseIdentityPlugin):
         self.project_name = project_name
         self.project_domain_id = project_domain_id
         self.project_domain_name = project_domain_name
+        self.include_catalog = include_catalog
 
     @property
     def token_url(self):
@@ -84,18 +87,17 @@ class Auth(base.BaseIdentityPlugin):
             ident[name] = auth_data
 
         if not ident:
-            raise exceptions.AuthorizationFailure('Authentication method '
-                                                  'required (e.g. password)')
+            raise exceptions.AuthorizationFailure(
+                _('Authentication method required (e.g. password)'))
 
         mutual_exclusion = [bool(self.domain_id or self.domain_name),
                             bool(self.project_id or self.project_name),
                             bool(self.trust_id)]
 
         if sum(mutual_exclusion) > 1:
-            raise exceptions.AuthorizationFailure('Authentication cannot be '
-                                                  'scoped to multiple '
-                                                  'targets. Pick one of: '
-                                                  'project, domain or trust')
+            raise exceptions.AuthorizationFailure(
+                _('Authentication cannot be scoped to multiple targets. Pick '
+                  'one of: project, domain or trust'))
 
         if self.domain_id:
             body['auth']['scope'] = {'domain': {'id': self.domain_id}}
@@ -114,8 +116,14 @@ class Auth(base.BaseIdentityPlugin):
         elif self.trust_id:
             body['auth']['scope'] = {'OS-TRUST:trust': {'id': self.trust_id}}
 
-        _logger.debug('Making authentication request to %s', self.token_url)
-        resp = session.post(self.token_url, json=body, headers=headers,
+        # NOTE(jamielennox): we add nocatalog here rather than in token_url
+        # directly as some federation plugins require the base token_url
+        token_url = self.token_url
+        if not self.include_catalog:
+            token_url += '?nocatalog'
+
+        _logger.debug('Making authentication request to %s', token_url)
+        resp = session.post(token_url, json=body, headers=headers,
                             authenticated=False, log=False, **rkwargs)
 
         try:
@@ -165,7 +173,7 @@ class AuthMethod(object):
             setattr(self, param, kwargs.pop(param, None))
 
         if kwargs:
-            msg = "Unexpected Attributes: %s" % ", ".join(kwargs.keys())
+            msg = _("Unexpected Attributes: %s") % ", ".join(kwargs.keys())
             raise AttributeError(msg)
 
     @classmethod
@@ -178,12 +186,14 @@ class AuthMethod(object):
     def get_auth_data(self, session, auth, headers, **kwargs):
         """Return the authentication section of an auth plugin.
 
-        :param Session session: The communication session.
+        :param session: The communication session.
+        :type session: keystoneclient.session.Session
         :param Auth auth: The auth plugin calling the method.
         :param dict headers: The headers that will be sent with the auth
                              request if a plugin needs to add to them.
-        :return tuple(string, dict): The identifier of this plugin and a dict
-                                     of authentication data for the auth type.
+        :return: The identifier of this plugin and a dict of authentication
+                 data for the auth type.
+        :rtype: tuple(string, dict)
         """
 
 
@@ -206,23 +216,20 @@ class AuthConstructor(Auth):
 
 
 class PasswordMethod(AuthMethod):
+    """Construct a User/Password based authentication method.
+
+    :param string password: Password for authentication.
+    :param string username: Username for authentication.
+    :param string user_id: User ID for authentication.
+    :param string user_domain_id: User's domain ID for authentication.
+    :param string user_domain_name: User's domain name for authentication.
+    """
 
     _method_parameters = ['user_id',
                           'username',
                           'user_domain_id',
                           'user_domain_name',
                           'password']
-
-    def __init__(self, **kwargs):
-        """Construct a User/Password based authentication method.
-
-        :param string password: Password for authentication.
-        :param string username: Username for authentication.
-        :param string user_id: User ID for authentication.
-        :param string user_domain_id: User's domain ID for authentication.
-        :param string user_domain_name: User's domain name for authentication.
-        """
-        super(PasswordMethod, self).__init__(**kwargs)
 
     def get_auth_data(self, session, auth, headers, **kwargs):
         user = {'password': self.password}
@@ -241,6 +248,25 @@ class PasswordMethod(AuthMethod):
 
 
 class Password(AuthConstructor):
+    """A plugin for authenticating with a username and password.
+
+    :param string auth_url: Identity service endpoint for authentication.
+    :param string password: Password for authentication.
+    :param string username: Username for authentication.
+    :param string user_id: User ID for authentication.
+    :param string user_domain_id: User's domain ID for authentication.
+    :param string user_domain_name: User's domain name for authentication.
+    :param string trust_id: Trust ID for trust scoping.
+    :param string domain_id: Domain ID for domain scoping.
+    :param string domain_name: Domain name for domain scoping.
+    :param string project_id: Project ID for project scoping.
+    :param string project_name: Project name for project scoping.
+    :param string project_domain_id: Project's domain ID for project.
+    :param string project_domain_name: Project's domain name for project.
+    :param bool reauthenticate: Allow fetching a new token if the current one
+                                is going to expire. (optional) default True
+    """
+
     _auth_method_class = PasswordMethod
 
     @classmethod
@@ -260,15 +286,12 @@ class Password(AuthConstructor):
 
 
 class TokenMethod(AuthMethod):
+    """Construct an Auth plugin to fetch a token from a token.
+
+    :param string token: Token for authentication.
+    """
 
     _method_parameters = ['token']
-
-    def __init__(self, **kwargs):
-        """Construct an Auth plugin to fetch a token from a token.
-
-        :param string token: Token for authentication.
-        """
-        super(TokenMethod, self).__init__(**kwargs)
 
     def get_auth_data(self, session, auth, headers, **kwargs):
         headers['X-Auth-Token'] = self.token
@@ -276,6 +299,21 @@ class TokenMethod(AuthMethod):
 
 
 class Token(AuthConstructor):
+    """A plugin for authenticating with an existing Token.
+
+    :param string auth_url: Identity service endpoint for authentication.
+    :param string token: Token for authentication.
+    :param string trust_id: Trust ID for trust scoping.
+    :param string domain_id: Domain ID for domain scoping.
+    :param string domain_name: Domain name for domain scoping.
+    :param string project_id: Project ID for project scoping.
+    :param string project_name: Project name for project scoping.
+    :param string project_domain_id: Project's domain ID for project.
+    :param string project_domain_name: Project's domain name for project.
+    :param bool reauthenticate: Allow fetching a new token if the current one
+                                is going to expire. (optional) default True
+    """
+
     _auth_method_class = TokenMethod
 
     def __init__(self, auth_url, token, **kwargs):

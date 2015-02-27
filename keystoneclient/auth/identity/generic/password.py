@@ -12,7 +12,7 @@
 
 import logging
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from keystoneclient import _discover
 from keystoneclient.auth.identity.generic import base
@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 def get_options():
     return [
+        cfg.StrOpt('user-id', help='User id'),
         cfg.StrOpt('user-name', dest='username', help='Username',
                    deprecated_name='username'),
         cfg.StrOpt('user-domain-id', help="User's domain id"),
@@ -34,19 +35,19 @@ def get_options():
 
 
 class Password(base.BaseGenericPlugin):
-    """A common user/password authentication plugin."""
+    """A common user/password authentication plugin.
+
+    :param string username: Username for authentication.
+    :param string user_id: User ID for authentication.
+    :param string password: Password for authentication.
+    :param string user_domain_id: User's domain ID for authentication.
+    :param string user_domain_name: User's domain name for authentication.
+
+    """
 
     @utils.positional()
     def __init__(self, auth_url, username=None, user_id=None, password=None,
                  user_domain_id=None, user_domain_name=None, **kwargs):
-        """Construct plugin.
-
-        :param string username: Username for authentication.
-        :param string user_id: User ID for authentication.
-        :param string password: Password for authentication.
-        :param string user_domain_id: User's domain ID for authentication.
-        :param string user_domain_name: User's domain name for authentication.
-        """
         super(Password, self).__init__(auth_url=auth_url, **kwargs)
 
         self._username = username

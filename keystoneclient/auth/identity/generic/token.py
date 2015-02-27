@@ -12,7 +12,7 @@
 
 import logging
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from keystoneclient import _discover
 from keystoneclient.auth.identity.generic import base
@@ -29,12 +29,12 @@ def get_options():
 
 
 class Token(base.BaseGenericPlugin):
+    """Generic token auth plugin.
+
+    :param string token: Token for authentication.
+    """
 
     def __init__(self, auth_url, token=None, **kwargs):
-        """Construct a plugin.
-
-        :param string token: Token for authentication.
-        """
         super(Token, self).__init__(auth_url, **kwargs)
         self._token = token
 
