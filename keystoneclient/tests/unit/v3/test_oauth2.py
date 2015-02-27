@@ -94,7 +94,8 @@ class ConsumerTests(utils.TestCase, utils.CrudTests):
         ref_list = [self.new_ref(), self.new_ref()]
 
         self.stub_entity('GET',
-                      parts=[self.path_prefix, 'users', user_id, self.collection_key],
+                      parts=['users', user_id, 
+                        self.path_prefix, self.collection_key],
                       entity=ref_list)
 
         returned_list = self.manager.list(user=user_id)

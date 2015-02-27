@@ -78,7 +78,7 @@ class ConsumerManager(base.CrudManager):
 
     def list(self, user=None, **kwargs):  
         if user:
-            base_url = self.base_url + '/users/%s' % base.getid(user)
+            base_url = '/users/{0}'.format(base.getid(user)) + self.base_url
 
         else:
             base_url = self.base_url 
