@@ -34,7 +34,7 @@ class RoleManager(base.CrudManager):
         return super(RoleManager, self).create(
             name=name,
             is_internal=is_internal,
-            application=base.getid(application),
+            application_id=base.getid(application),
             **kwargs)
     
 
@@ -47,7 +47,7 @@ class RoleManager(base.CrudManager):
         return super(RoleManager, self).update(role_id=base.getid(role),
                                                name=name,
                                                is_internal=is_internal,
-                                               application=base.getid(application),
+                                               application_id=base.getid(application),
                                                **kwargs)
    
 

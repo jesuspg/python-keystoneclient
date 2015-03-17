@@ -38,7 +38,7 @@ class PermissionManager(base.CrudManager):
         return super(PermissionManager, self).create(
                                         name=name,
                                         is_internal=is_internal,
-                                        application=base.getid(application),
+                                        application_id=base.getid(application),
                                         **kwargs)
     def get(self, permission):
         return super(PermissionManager, self).get(
@@ -50,7 +50,7 @@ class PermissionManager(base.CrudManager):
                                         permission_id=base.getid(permission),
                                         name=name,
                                         is_internal=is_internal,
-                                        application=base.getid(application),
+                                        application_id=base.getid(application),
                                         **kwargs)
       
 
