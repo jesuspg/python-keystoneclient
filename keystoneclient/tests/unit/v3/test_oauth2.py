@@ -15,13 +15,9 @@
 import base64
 import urllib
 import uuid
-import mock
-import six
-from six.moves.urllib import parse as urlparse
-from testtools import matchers
 
+from keystoneclient import exceptions
 from keystoneclient import session
-from keystoneclient.openstack.common import timeutils
 from keystoneclient.tests.v3 import client_fixtures
 from keystoneclient.tests.v3 import utils
 from keystoneclient.v3.contrib.oauth2 import auth
@@ -192,7 +188,7 @@ class AuthorizationCodeTests(utils.TestCase):
         assert(isinstance(response_body, dict))
         
 
-class AccessTokenTests(utils.TestCase):
+class AccessTokenTests(utils.TestCase, utils.CrudTests):
 
 
     def setUp(self):
@@ -200,8 +196,10 @@ class AccessTokenTests(utils.TestCase):
         self.manager = self.client.oauth2.access_tokens
         self.model = access_tokens.AccessToken
         self.path_prefix = 'OS-OAUTH2'
+        self.key = 'access_token'
+        self.collection_key = 'access_tokens'
 
-    def test_create_access_token(self):
+    def test_create(self):
         consumer_id = uuid.uuid4().hex
         consumer_secret = uuid.uuid4().hex
         redirect_uri = uuid.uuid4().hex
@@ -242,6 +240,33 @@ class AccessTokenTests(utils.TestCase):
         expected_auth = 'Basic ' + base64.b64encode(auth_string)
         self.assertRequestHeaderEqual('Authorization', expected_auth)
 
+    def test_list_for_user(self):
+        # TODO(garcianavalon) implement
+        pass
+
+    def test_list_params(self):
+        # list not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.list)
+
+    def test_list(self):
+        # list not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.list)
+
+    def test_update(self):
+        # Update not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.update)
+
+    def test_delete(self):
+        # Delete not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.delete)
+
+    def test_get(self):
+        # Get not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.get)
+
+    def test_find(self):
+        # Find not supported for access tokens
+        self.assertRaises(exceptions.MethodNotImplemented, self.manager.find)
 
 class AuthenticateWithOAuthTests(utils.TestCase):
 
