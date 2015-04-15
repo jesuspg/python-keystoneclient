@@ -15,7 +15,7 @@
 import uuid
 
 from keystoneclient import exceptions
-from keystoneclient.tests.v3 import utils
+from keystoneclient.tests.unit.v3 import utils
 from keystoneclient.v3.contrib.fiware_roles import allowed
 from keystoneclient.v3.contrib.fiware_roles import roles
 from keystoneclient.v3.contrib.fiware_roles import role_assignments

@@ -18,8 +18,8 @@ import uuid
 
 from keystoneclient import exceptions
 from keystoneclient import session
-from keystoneclient.tests.v3 import client_fixtures
-from keystoneclient.tests.v3 import utils
+from keystoneclient.tests.unit.v3 import client_fixtures
+from keystoneclient.tests.unit.v3 import utils
 from keystoneclient.v3.contrib.oauth2 import auth
 from keystoneclient.v3.contrib.oauth2 import access_tokens
 from keystoneclient.v3.contrib.oauth2 import authorization_codes
@@ -241,8 +241,27 @@ class AccessTokenTests(utils.TestCase, utils.CrudTests):
         self.assertRequestHeaderEqual('Authorization', expected_auth)
 
     def test_list_for_user(self):
-        # TODO(garcianavalon) implement
-        pass
+        user_id = uuid.uuid4().hex
+        access_tokens_ref = {
+            'access_tokens': [
+                {
+                    'id': uuid.uuid4().hex,
+                },
+                {
+                    'id': uuid.uuid4().hex,
+                },
+            ]
+        }
+        self.stub_url('GET',
+                      [self.path_prefix, 'users', user_id,
+                       self.collection_key],
+                       status_code=204,
+                       json=access_tokens_ref)
+
+        result = self.manager.list_for_user(user=user_id)
+
+        self.assertEqual(len(access_tokens_ref['access_tokens']), 
+                         len(result))
 
     def test_list_params(self):
         # list not supported for access tokens

@@ -14,8 +14,7 @@
 
 import uuid
 
-from keystoneclient import exceptions
-from keystoneclient.tests.v3 import utils
+from keystoneclient.tests.unit.v3 import utils
 from keystoneclient.v3.contrib.user_registration import users
 from keystoneclient.v3.contrib.user_registration import activation_key
 from keystoneclient.v3.contrib.user_registration import token

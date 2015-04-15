@@ -44,11 +44,9 @@ class AccessTokenManager(base.CrudManager):
 
     def list_for_user(self, user, **kwargs):
         """lists all the created access token for a user."""
-        base_url = self.base_url
+        base_url = self.base_url + '/users/{0}'.format(base.getid(user))
         return super(AccessTokenManager, self).list(
-            base_url=base_url,
-            user=base.getid(user),
-             **kwargs)
+            base_url=base_url, **kwargs)
 
     def list(self, **kwargs):
         raise exceptions.MethodNotImplemented(
