@@ -253,8 +253,8 @@ class AccessTokenTests(utils.TestCase, utils.CrudTests):
             ]
         }
         self.stub_url('GET',
-                      [self.path_prefix, 'users', user_id,
-                       self.collection_key],
+                      ['users', user_id,
+                       self.path_prefix, self.collection_key],
                        status_code=204,
                        json=access_tokens_ref)
 

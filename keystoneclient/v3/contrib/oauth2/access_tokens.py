@@ -44,7 +44,7 @@ class AccessTokenManager(base.CrudManager):
 
     def list_for_user(self, user, **kwargs):
         """lists all the created access token for a user."""
-        base_url = self.base_url + '/users/{0}'.format(base.getid(user))
+        base_url = '/users/{0}'.format(base.getid(user)) + self.base_url
         return super(AccessTokenManager, self).list(
             base_url=base_url, **kwargs)
 
