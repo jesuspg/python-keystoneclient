@@ -138,11 +138,12 @@ class EndpointGroupFilterManager(base.CrudManager):
         endpoint_group_id = base.getid(endpoint_group)
 
         if project_id and endpoint_group_id:
-            api_path = '/endpoint_groups/%s/projects/%s' % (project_id, endpoint_group_id)
+            api_path = '/endpoint_groups/{0}/projects/{1}'.format(endpoint_group_id,
+                                                                  project_id)
         elif project_id:
-            api_path = '/endpoint_groups/projects/%s' % (project_id)
+            api_path = '/endpoint_groups/projects/{0}'.format(project_id)
         elif endpoint_group_id:
-            api_path = '/endpoint_groups/%s/projects' % (endpoint_group_id)
+            api_path = '/endpoint_groups/{0}/projects'.format(endpoint_group_id)
         else:
             msg = _('Must specify a project, an endpoint_group, or both')
             raise exceptions.ValidationError(msg)
