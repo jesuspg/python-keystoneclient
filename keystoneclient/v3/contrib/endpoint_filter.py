@@ -18,10 +18,11 @@ from keystoneclient.i18n import _
 from keystoneclient.v3 import endpoints
 from keystoneclient.v3 import projects
 
+OS_EP_FILTER_EXT = 'OS-EP-FILTER'
 
 class EndpointFilterManager(base.Manager):
     """Manager class for manipulating project-endpoint associations."""
-    OS_EP_FILTER_EXT = '/OS-EP-FILTER'
+    
 
     def _build_base_url(self, project=None, endpoint=None):
         project_id = base.getid(project)
@@ -37,7 +38,7 @@ class EndpointFilterManager(base.Manager):
             msg = _('Must specify a project, an endpoint, or both')
             raise exceptions.ValidationError(msg)
 
-        return self.OS_EP_FILTER_EXT + api_path
+        return '/' + OS_EP_FILTER_EXT + api_path
 
     def add_endpoint_to_project(self, project, endpoint):
         """Create a project-endpoint association."""
@@ -87,3 +88,47 @@ class EndpointFilterManager(base.Manager):
             base_url,
             projects.ProjectManager.collection_key,
             obj_class=projects.ProjectManager.resource_class)
+
+
+class EndpointGroupFilter(base.Resource):
+    pass
+
+class EndpointGroupFilterManager(base.CrudManager):
+    """Manager class for Endpoint Group Filters."""
+
+    resource_class = EndpointGroupFilter
+    collection_key = 'endpoint_groups'
+    key = 'endpoint_group'
+    base_url = OS_EP_FILTER_EXT
+
+    def create(self, name, description=None, filters=None, **kwargs):
+        filters = filters if filters else {}
+
+        return super(EndpointGroupFilterManager, self).create(
+            name=name,
+            description=description,
+            filters=filters,
+            **kwargs)
+
+    def get(self, endpoint_group):
+        return super(EndpointGroupFilterManager, self).get(
+            endpoint_group_id=base.getid(endpoint_group))
+
+
+    def update(self, endpoint_group, name=None, description=None, filters=None, **kwargs):
+        return super(EndpointGroupFilterManager, self).update(
+            endpoint_group_id=base.getid(endpoint_group),
+            name=name,
+            description=description,
+            filters=filters,
+            **kwargs)
+   
+
+    def delete(self, endpoint_group):
+        return super(EndpointGroupFilterManager, self).delete(
+            endpoint_group_id=base.getid(endpoint_group))
+
+
+    def list(self, **kwargs):
+        base_url = self.base_url
+        return super(EndpointGroupFilterManager, self).list(base_url=base_url, **kwargs)

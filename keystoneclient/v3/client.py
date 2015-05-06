@@ -183,6 +183,8 @@ EndpointPolicyManager`
         self.groups = groups.GroupManager(self._adapter)
         self.oauth1 = oauth1.create_oauth_manager(self._adapter)
         # TODO(garcianavalon) document this
+        self.endpoint_groups = endpoint_filter.EndpointGroupFilterManager(
+            self._adapter)
         self.fiware_roles = fiware_roles.FiwareRolesManager(self)
         self.oauth2 = oauth2.create_oauth_manager(self)
         self.user_registration = user_registration.UserRegistrationManager(self)
