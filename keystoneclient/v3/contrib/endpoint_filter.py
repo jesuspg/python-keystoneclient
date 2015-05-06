@@ -23,7 +23,6 @@ OS_EP_FILTER_EXT = 'OS-EP-FILTER'
 class EndpointFilterManager(base.Manager):
     """Manager class for manipulating project-endpoint associations."""
     
-
     def _build_base_url(self, project=None, endpoint=None):
         project_id = base.getid(project)
         endpoint_id = base.getid(endpoint)
@@ -93,6 +92,7 @@ class EndpointFilterManager(base.Manager):
 class EndpointGroupFilter(base.Resource):
     pass
 
+
 class EndpointGroupFilterManager(base.CrudManager):
     """Manager class for Endpoint Group Filters."""
 
@@ -132,3 +132,66 @@ class EndpointGroupFilterManager(base.CrudManager):
     def list(self, **kwargs):
         base_url = self.base_url
         return super(EndpointGroupFilterManager, self).list(base_url=base_url, **kwargs)
+
+    def _build_base_url(self, project=None, endpoint_group=None):
+        project_id = base.getid(project)
+        endpoint_group_id = base.getid(endpoint_group)
+
+        if project_id and endpoint_group_id:
+            api_path = '/endpoint_groups/%s/projects/%s' % (project_id, endpoint_group_id)
+        elif project_id:
+            api_path = '/endpoint_groups/projects/%s' % (project_id)
+        elif endpoint_group_id:
+            api_path = '/endpoint_groups/%s/projects' % (endpoint_group_id)
+        else:
+            msg = _('Must specify a project, an endpoint_group, or both')
+            raise exceptions.ValidationError(msg)
+
+        return '/' + OS_EP_FILTER_EXT + api_path
+
+    def add_endpoint_group_to_project(self, project, endpoint_group):
+        """Create a project-endpoint_group association.
+        PUT /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}
+        """
+        if not (project and endpoint_group):
+            raise ValueError(_('project and endpoint_group are required'))
+
+        base_url = self._build_base_url(project=project,
+                                        endpoint_group=endpoint_group)
+        return super(EndpointGroupFilterManager, self)._put(url=base_url)
+
+    def delete_endpoint_group_from_project(self, project, endpoint_group):
+        """Remove a project-endpoint_group association.
+        DELETE /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}
+        """
+        if not (project and endpoint_group):
+            raise ValueError(_('project and endpoint_group are required'))
+
+        base_url = self._build_base_url(project=project,
+                                        endpoint_group=endpoint_group)
+        return super(EndpointGroupFilterManager, self)._delete(url=base_url)
+
+    def check_endpoint_group_in_project(self, project, endpoint_group):
+        """Checks if project-endpoint_group association exist.
+        HEAD /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}
+        """
+        if not (project and endpoint_group):
+            raise ValueError(_('project and endpoint_group are required'))
+
+        base_url = self._build_base_url(project=project,
+                                        endpoint_group=endpoint_group)
+        return super(EndpointGroupFilterManager, self)._head(url=base_url)
+
+    def list_endpoint_groups_for_project(self, project):
+        """List all endpoints for a given project.
+        GET /OS-EP-FILTER/endpoint_groups/projects/{project_id}
+
+        """
+        if not project:
+            raise ValueError(_('project is required'))
+
+        base_url = self._build_base_url(project=project)
+        return super(EndpointGroupFilterManager, self)._list(
+            base_url,
+            self.collection_key,
+            obj_class=self.resource_class)
