@@ -183,16 +183,17 @@ class EndpointGroupFilterManager(base.CrudManager):
                                         endpoint_group=endpoint_group)
         return super(EndpointGroupFilterManager, self)._head(url=base_url)
 
-    def list_endpoint_groups_for_project(self, project):
-        """List all endpoints for a given project.
-        GET /OS-EP-FILTER/endpoint_groups/projects/{project_id}
+    # NOTE(garcianavalon) this is documented but not suported in keystone...
+    # def list_endpoint_groups_for_project(self, project):
+    #     """List all endpoints for a given project.
+    #     GET /OS-EP-FILTER/endpoint_groups/projects/{project_id}
 
-        """
-        if not project:
-            raise ValueError(_('project is required'))
+    #     """
+    #     if not project:
+    #         raise ValueError(_('project is required'))
 
-        base_url = self._build_base_url(project=project)
-        return super(EndpointGroupFilterManager, self)._list(
-            base_url,
-            self.collection_key,
-            obj_class=self.resource_class)
+    #     base_url = self._build_base_url(project=project)
+    #     return super(EndpointGroupFilterManager, self)._list(
+    #         base_url,
+    #         self.collection_key,
+    #         obj_class=self.resource_class)
