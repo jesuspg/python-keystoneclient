@@ -28,7 +28,7 @@ class EndpointFilterManager(base.Manager):
         endpoint_id = base.getid(endpoint)
 
         if project_id and endpoint_id:
-            api_path = '/projects/%s/endpoints/%s' % (project_id, endpoint_id)
+            api_path = '/projects/%s/endpoints/%s' % (endpoint_id, project_id)
         elif project_id:
             api_path = '/projects/%s/endpoints' % (project_id)
         elif endpoint_id:
