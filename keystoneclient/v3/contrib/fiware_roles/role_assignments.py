@@ -41,7 +41,7 @@ class RoleAssignmentManager(base.CrudManager):
     base_url = ROLES_PATH
 
     def list_user_role_assignments(self, user=None, organization=None, 
-    							   application=None):
+    							   application=None, default_organization=False):
         """Lists role assignments for users.
 
         If no arguments are provided, all role assignments in the
@@ -50,8 +50,10 @@ class RoleAssignmentManager(base.CrudManager):
         :param user: User to be used as query filter. (optional)
         :param organization: Project to be used as query filter.
                         (optional)
-        :param application: Domain to be used as query
+        :param application: Application to be used as query
                        filter. (optional)
+        :param default_organization: If set to true, the endpoint will filter role assignments
+            only in the default_project_id and the organization param is ignored. (optional)
         """
 
         query_params = {}
@@ -61,6 +63,8 @@ class RoleAssignmentManager(base.CrudManager):
             query_params['organization_id'] = base.getid(organization)
         if application:
             query_params['application_id'] = base.getid(application)
+        if default_organization:
+            query_params['default_organization'] = True
 
         base_url = self.base_url + '/users'
         return super(RoleAssignmentManager, self).list(base_url=base_url, 
