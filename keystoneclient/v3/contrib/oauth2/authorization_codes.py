@@ -74,7 +74,7 @@ class AuthorizationCodeManager(base.CrudManager):
 
         return self.resource_class(self, authorization_code)
 
-    def request_authorization(self, consumer, redirect_uri, scope, state=None):
+    def request_authorization(self, consumer, redirect_uri, scope, response_type='code', state=None):
         """ Send the consumer credentials to the OAuth2 provider. 
 
         The user then will be asked to authorize the client for the requested scopes. In 
@@ -101,7 +101,7 @@ class AuthorizationCodeManager(base.CrudManager):
         # NOTE(garcianavalon) we use a list of tuples to ensure param order
         # in the query string to be able to mock it during testing.
         credentials = [
-            ('response_type', 'code'),
+            ('response_type', response_type),
             ('client_id', base.getid(consumer)),
             ('redirect_uri', redirect_uri),
             ('scope', scope_string),
