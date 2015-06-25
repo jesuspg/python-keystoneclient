@@ -68,9 +68,15 @@ class AuthorizationCodeManager(base.CrudManager):
         query = dict(urlparse.parse_qsl(parsed.query))
         authorization_code = {
             'redirect_uri':redirect_uri,
-            'code': query['code'],
             'state': query['state']
         }
+        code = query.get('code', None)
+        if code:
+            authorization_code['code'] = code
+
+        token = query.get('token', None)
+        if token:
+            authorization_code['token'] = token
 
         return self.resource_class(self, authorization_code)
 
