@@ -141,7 +141,7 @@ class EndpointGroupFilterManager(base.CrudManager):
             api_path = '/endpoint_groups/{0}/projects/{1}'.format(endpoint_group_id,
                                                                   project_id)
         elif project_id:
-            api_path = '/endpoint_groups/projects/{0}'.format(project_id)
+            api_path = '/projects/{0}/endpoint_groups'.format(project_id)
         elif endpoint_group_id:
             api_path = '/endpoint_groups/{0}/projects'.format(endpoint_group_id)
         else:
@@ -183,17 +183,16 @@ class EndpointGroupFilterManager(base.CrudManager):
                                         endpoint_group=endpoint_group)
         return super(EndpointGroupFilterManager, self)._head(url=base_url)
 
-    # NOTE(garcianavalon) this is documented but not suported in keystone...
-    # def list_endpoint_groups_for_project(self, project):
-    #     """List all endpoints for a given project.
-    #     GET /OS-EP-FILTER/endpoint_groups/projects/{project_id}
+    def list_endpoint_groups_for_project(self, project):
+        """List all endpoints for a given project.
+        GET /OS-EP-FILTER/projects/{project_id}/endpoint_groups
 
-    #     """
-    #     if not project:
-    #         raise ValueError(_('project is required'))
+        """
+        if not project:
+            raise ValueError(_('project is required'))
 
-    #     base_url = self._build_base_url(project=project)
-    #     return super(EndpointGroupFilterManager, self)._list(
-    #         base_url,
-    #         self.collection_key,
-    #         obj_class=self.resource_class)
+        base_url = self._build_base_url(project=project)
+        return super(EndpointGroupFilterManager, self)._list(
+            base_url,
+            self.collection_key,
+            obj_class=self.resource_class)
