@@ -544,12 +544,12 @@ class HackingCode(fixtures.Fixture):
 
     oslo_namespace_imports = {
         'code': """
-            import oslo.utils
             import oslo_utils
-            import oslo.utils.encodeutils
+            import oslo_utils
+            import oslo_utils.encodeutils
             import oslo_utils.encodeutils
             from oslo import utils
-            from oslo.utils import encodeutils
+            from oslo_utils import encodeutils
             from oslo_utils import encodeutils
 
             import oslo.serialization
