@@ -29,6 +29,7 @@ from keystoneclient.v3.contrib import oauth1
 from keystoneclient.v3.contrib import oauth2
 from keystoneclient.v3.contrib import trusts
 from keystoneclient.v3.contrib import user_registration
+from keystoneclient.v3.contrib import two_factor
 from keystoneclient.v3 import credentials
 from keystoneclient.v3 import domains
 from keystoneclient.v3 import endpoints
@@ -188,6 +189,7 @@ EndpointPolicyManager`
         self.fiware_roles = fiware_roles.FiwareRolesManager(self)
         self.oauth2 = oauth2.create_oauth_manager(self)
         self.user_registration = user_registration.UserRegistrationManager(self)
+        self.two_factor = two_factor.TwoFactorManager(self)
         self.policies = policies.PolicyManager(self._adapter)
         self.projects = projects.ProjectManager(self._adapter)
         self.regions = regions.RegionManager(self._adapter)
