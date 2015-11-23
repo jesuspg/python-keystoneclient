@@ -1,8 +1,9 @@
 from keystoneclient.v3 import client
 from keystoneclient import session
 from keystoneclient.auth.identity import v3
+import pyotp
 
-from keystoneclient.v3.contrib.two_factor import auth as authentication
+from keystoneclient.v3.contrib.two_factor import auth
 url = 'http://127.0.0.1:5000/v3'
 
 def fiwareclient(session=None, request=None):# TODO(garcianavalon) use this
@@ -21,36 +22,38 @@ def fiwareclient(session=None, request=None):# TODO(garcianavalon) use this
     keystone = client.Client(session=session)
     return keystone
 
-def _password_session():
-    auth = v3.Password(auth_url="http://localhost:5000/v3",
-                       user_id='idm',
-                       password='idm',
-                       project_name='idm',
-                       project_domain_id='default')
-    return session.Session(auth=auth)
-
-def _two_factor_session(user, password, verification_code=None, project='idm', project_domain_id='default'):
-    auth = authentication.TwoFactor(auth_url="http://localhost:5000/v3",
-                        user_id=user,
-                        password=password,
-                        verification_code=verification_code,
-                        user_domain_name=domain,
-                        user_domain_id=project_domain_id)
+def _two_factor_session(user, password, verification_code=None, domain_id='default'):
+    auth_object = auth.TwoFactor(auth_url=url,
+                                 user_id=user,
+                                 password=password,
+                                 user_domain_id=domain_id,
+                                 verification_code=verification_code)
+    return session.Session(auth=auth_object)
 
 keystone = fiwareclient()
 
-# RUN fab keystone.test_data
+# Create example user
+keystone.users.create(name="exampleuser", password="example")
 
-keystone.two_factor.keys.generate_new_key(user='user0', security_question='Who?', security_answer='Me!')
-print("Created key for user0.")
+# Enable two factor
+key = keystone.two_factor.keys.generate_new_key(user='exampleuser', security_question='Who?', security_answer='Me!')
+print "Created key for exampleuser.", key.two_factor_key
 
-if keystone.two_factor.keys.check_activated_two_factor(user='user0'):
-    print("Two factor is enabled for user0!")
+if keystone.two_factor.keys.check_activated_two_factor(user='exampleuser'):
+    print "Two factor is enabled for exampleuser!"
+    code = pyotp.TOTP(key.two_factor_key).now()
+    print code
+    keystone2 = fiwareclient(session=_two_factor_session(user="exampleuser",
+                                                         password="exampleuser",
+                                                         verification_code=code))
+    print keystone2.users.list()
 
+# Disable two factor
+keystone.two_factor.keys.deactivate_two_factor(user='exampleuser')
+print "Disabling two factor."
 
+if not keystone.two_factor.keys.check_activated_two_factor(user='exampleuser'):
+    print "Two factor is disabled for exampleuser!"
 
-keystone.two_factor.keys.deactivate_two_factor(user='user0')
-print("Disabling two factor.")
-
-if not keystone.two_factor.keys.check_activated_two_factor(user='user0'):
-    print("Two factor is disableed for user0!")
+# Delete example user
+keystone.users.delete(user="exampleuser")
