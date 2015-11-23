@@ -75,6 +75,7 @@ class TwoFactorAuthTests(utils.TestCase):
     def test_two_factor_authenticate_success(self):
         verification_code = uuid.uuid4().hex
         password = uuid.uuid4().hex
+        user_id = uuid.uuid4().hex
 
         # Just use an existing project scoped token and change
         # the methods to password, and add its section.
@@ -90,7 +91,8 @@ class TwoFactorAuthTests(utils.TestCase):
         a = auth.TwoFactor(
             self.TEST_URL,
             verification_code=verification_code,
-            password=password)
+            password=password,
+            user_id=user_id)
         s = session.Session(auth=a)
         t = s.get_token()
         self.assertEqual(self.TEST_TOKEN, t)
@@ -102,7 +104,8 @@ class TwoFactorAuthTests(utils.TestCase):
                     "password": {
                         'user': {
                             "verification_code": verification_code,
-                            'password': password
+                            'password': password,
+                            'id': user_id
                         }
                     }
                 }
@@ -115,6 +118,7 @@ class TwoFactorAuthTests(utils.TestCase):
 
         verification_code = uuid.uuid4().hex
         password = uuid.uuid4().hex
+        user_id = uuid.uuid4().hex
 
         # Just use an existing project scoped token and change
         # the methods to password, and add its section.
@@ -129,7 +133,8 @@ class TwoFactorAuthTests(utils.TestCase):
         a = auth.TwoFactor(
             self.TEST_URL,
             verification_code=verification_code,
-            password=password)
+            password=password,
+            user_id=user_id)
         s = session.Session(auth=a)
         t = s.get_token()
         self.assertEqual(self.TEST_TOKEN, t)
@@ -140,8 +145,9 @@ class TwoFactorAuthTests(utils.TestCase):
                     "methods": ["password"],
                     "password": {
                         'user': {
-                            "verification_code": verification_code,
-                            'password': password
+                            'verification_code': verification_code,
+                            'password': password,
+                            'id': user_id
                         }
                     }
                 }

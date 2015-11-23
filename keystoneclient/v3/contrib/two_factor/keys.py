@@ -41,7 +41,7 @@ class KeyManager(base.Manager):
 
         return super(KeyManager, self)._post(body=data, 
                                              url=self._url(user),
-                                             response_key="two_factor_auth_data")
+                                             response_key="two_factor_auth")
     
     def deactivate_two_factor(self, user):
         

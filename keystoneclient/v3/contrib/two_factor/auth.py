@@ -59,7 +59,7 @@ class TwoFactor(v3.Password):
         options = super(TwoFactor, cls).get_options()
 
         options.extend([
-            cfg.StrOpt('verification_code', help='Generated code by timestamp'),
+            cfg.StrOpt('verification-code', help='Generated code by timestamp'),
         ])
 
         return options
