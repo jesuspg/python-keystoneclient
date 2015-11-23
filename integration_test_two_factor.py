@@ -29,26 +29,39 @@ def two_factor_session(user, password, verification_code=None, domain_id='defaul
                                  verification_code=verification_code)
     return session.Session(auth=auth_object)
 
-def enable_two_factor(keystone, user, password):
+def enable_two_factor(keystone, user):
     key = keystone.two_factor.keys.generate_new_key(user=user.id, security_question='Who?', security_answer='Me!')
     print "Created key for example_user: ", key.two_factor_key
+    return key
 
-    if keystone.two_factor.keys.check_activated_two_factor(user=user.id):
-        print "Two factor is enabled for example_user!"
-        code = pyotp.TOTP(key.two_factor_key).now()
-        print code
-        keystone2 = fiwareclient(session=two_factor_session(user=user.id,
-                                                            password=password,
-                                                            verification_code=code))
+def authenticate(keystone, user, password, key=None, use_two_factor=True):
+    if use_two_factor:
+        if keystone.two_factor.keys.check_activated_two_factor(user=user.id):
+            print "Two factor is enabled for example_user!"
+            code = pyotp.TOTP(key.two_factor_key).now()
+            print code
+            keystone2 = fiwareclient(session=two_factor_session(user=user.id,
+                                                                password=password,
+                                                                verification_code=code))
+            try:
+                keystone2.users.get(user.id)
+                print "Auth with two factor worked"
+            except:
+                print "Auth with two factor didn't work"
+        else:
+            print "Two factor is disabled for exampleuser!"
+    else:
+        keystone3 = fiwareclient(session=two_factor_session(user=user.id,
+                                                             password=password))
         try:
-            keystone2.users.get(user.id)
-            print "Auth worked"
+            keystone3.users.get(user.id)
+            print "Auth without two factor worked"
         except:
-            print "Auth didn't work"
+            print "Auth without two factor didn't work"
 
 def disable_two_factor(keystone, user):
     keystone.two_factor.keys.deactivate_two_factor(user=user.id)
-    print "Disabling two factor."
+    print "Disabling two factor..."
 
     if not keystone.two_factor.keys.check_activated_two_factor(user=user.id):
         print "Two factor is disabled for exampleuser!"
@@ -63,8 +76,10 @@ def main():
     keystone.roles.grant(role=role, user=user, project=project)
 
     # Run tests
-    enable_two_factor(keystone, user, password="example_user")
+    key = enable_two_factor(keystone, user)
+    authenticate(keystone, user, password="example_user", key=key, use_two_factor=True)
     disable_two_factor(keystone, user)
+    authenticate(keystone, user, password="example_user", use_two_factor=False)
 
     # Delete example user
     keystone.projects.delete(project)
