@@ -52,7 +52,7 @@ class KeyManager(base.Manager):
             if user_id:
                 super(KeyManager, self)._head(url=self.base_url+'?user_id='+user_id)
             else:
-                super(KeyManager, self)._head(url=self.base_url+'?user_name='+username+'?domain_id='+domain)
+                super(KeyManager, self)._head(url=self.base_url+'?user_name='+username+'&domain_id='+domain)
             return True
         except:
             return False
