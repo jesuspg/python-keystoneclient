@@ -47,12 +47,14 @@ class KeyManager(base.Manager):
         
         return super(KeyManager, self)._delete(url=self._url(user))
 
-    def check_activated_two_factor(self, user_id=None, username=None, domain=None):
+    def check_activated_two_factor(self, user_id=None, username=None, domain_id=None, domain_name=None):
         try:
             if user_id:
                 super(KeyManager, self)._head(url=self.base_url+'?user_id='+user_id)
-            else:
-                super(KeyManager, self)._head(url=self.base_url+'?user_name='+username+'&domain_id='+domain)
+            elif domain_id:
+                super(KeyManager, self)._head(url=self.base_url+'?user_name='+username+'&domain_id='+domain_id)
+            elif domain_name:
+                super(KeyManager, self)._head(url=self.base_url+'?user_name='+username+'&domain_name='+domain_name)
             return True
         except:
             return False
