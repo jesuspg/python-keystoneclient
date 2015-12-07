@@ -34,11 +34,12 @@ class UsersTests(utils.TestCase):
     def test_generate_new_key(self):
         user_id = uuid.uuid4().hex
         key_ref = {
-            'two_factor_auth_data': {
+            'two_factor_auth': {
                 'security_answer': 'Sample answer',
                 'security_question': 'Sample question',
                 'two_factor_key': uuid.uuid4().hex,
                 'user_id': user_id,
+                'uri': 'otpauth://example'
             }
         }
         self.stub_url('POST',
@@ -59,14 +60,24 @@ class UsersTests(utils.TestCase):
 
         self.manager.deactivate_two_factor(user=user_id)
 
-    def test_check_activated_two_factor(self):
+    def test_check_activated_two_factor_with_id(self):
         user_id = uuid.uuid4().hex
 
         self.stub_url('HEAD',
                       [self.path_prefix, '/two_factor_auth'],
                       status_code=204)
 
-        self.manager.check_activated_two_factor(user=user_id)
+        self.manager.check_activated_two_factor(user_id=user_id)
+
+    def test_check_activated_two_factor_with_name_and_domain(self):
+        username = uuid.uuid4().hex
+        domain_id = uuid.uuid4().hex
+
+        self.stub_url('HEAD',
+                      [self.path_prefix, '/two_factor_auth'],
+                      status_code=204)
+
+        self.manager.check_activated_two_factor(username=username, domain_id=domain_id)
 
 
 class TwoFactorAuthTests(utils.TestCase):
