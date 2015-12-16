@@ -36,7 +36,7 @@ def enable_two_factor(keystone, user):
 
 def authenticate(keystone, user, password, key=None, use_two_factor=True):
     if use_two_factor:
-        if keystone.two_factor.keys.check_activated_two_factor(user=user.id):
+        if keystone.two_factor.keys.check_activated_two_factor(user_id=user.id):
             print "Two factor is enabled for example_user!"
             code = pyotp.TOTP(key.two_factor_key).now()
             print code
@@ -63,7 +63,7 @@ def disable_two_factor(keystone, user):
     keystone.two_factor.keys.deactivate_two_factor(user=user.id)
     print "Disabling two factor..."
 
-    if not keystone.two_factor.keys.check_activated_two_factor(user=user.id):
+    if not keystone.two_factor.keys.check_activated_two_factor(user_id=user.id):
         print "Two factor is disabled for exampleuser!"
 
 def main():

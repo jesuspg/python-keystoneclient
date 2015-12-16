@@ -34,10 +34,13 @@ class KeyManager(base.Manager):
         return '/users/{user_id}'.format(user_id=base.getid(user)) + self.base_url
 
     def generate_new_key(self, user, security_question, security_answer):
-        data = {}
-        data["two_factor_auth"] = {}
-        data["two_factor_auth"]["security_question"] = security_question
-        data["two_factor_auth"]["security_answer"] = security_answer
+        if security_question and security_answer:
+            data = {}
+            data["two_factor_auth"] = {}
+            data["two_factor_auth"]["security_question"] = security_question
+            data["two_factor_auth"]["security_answer"] = security_answer
+        else:
+            data = None
 
         return super(KeyManager, self)._post(body=data, 
                                              url=self._url(user),
