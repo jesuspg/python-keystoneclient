@@ -79,6 +79,32 @@ class UsersTests(utils.TestCase):
 
         self.manager.check_activated_two_factor(username=username, domain_id=domain_id)
 
+    def test_get_two_factor_data(self):
+        user_id = uuid.uuid4().hex
+        key_ref = {
+            'two_factor_auth': {
+                'security_question': 'Sample question',
+                'user_id': user_id,
+            }
+        }
+        self.stub_url('GET',
+                      ['users/', user_id, self.path_prefix, '/two_factor_data'],
+                      json=key_ref,
+                      status_code=200)
+
+        self.manager.get_two_factor_data(user=user_id)
+
+    def test_check_security_question(self):
+        user_id = uuid.uuid4().hex
+
+        self.stub_url('HEAD',
+                      ['users/', user_id, self.path_prefix, '/sec_question'],
+                      status_code=204)
+
+        self.manager.check_security_question(user=user_id,
+                                             security_answer="Sample answer")
+
+
 
 class TwoFactorAuthTests(utils.TestCase):
 
