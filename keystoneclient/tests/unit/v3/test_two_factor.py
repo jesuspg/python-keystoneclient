@@ -104,6 +104,36 @@ class UsersTests(utils.TestCase):
         self.manager.check_security_question(user=user_id,
                                              security_answer="Sample answer")
 
+    def test_remember_device(self):
+        username = uuid.uuid4().hex
+        domain_name = uuid.uuid4().hex
+        user_id = uuid.uuid4().hex
+        device_id = uuid.uuid4().hex
+        device_token = uuid.uuid4().hex
+
+        key_ref = {
+            'two_factor_auth': {
+                'device_id': device_id,
+                'device_token': device_token,
+                'user_id': user_id
+            }
+        }
+        self.stub_url('POST',
+                      [self.path_prefix, '/devices'],
+                      json=key_ref,
+                      status_code=201)
+
+        self.manager.remember_device(username=username, domain_name=domain_name)
+
+    def test_delete_all_devices(self):
+        user_id = uuid.uuid4().hex
+
+        self.stub_url('DELETE',
+                      ['users/', user_id, self.path_prefix, '/devices'],
+                      status_code=204)
+
+        self.manager.delete_all_devices(user=user_id)
+
 
 
 class TwoFactorAuthTests(utils.TestCase):

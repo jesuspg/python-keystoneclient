@@ -29,6 +29,7 @@ class TwoFactorMethod(v3.PasswordMethod):
     :param string user_domain_id: User's domain ID for authentication.
     :param string user_domain_name: User's domain name for authentication.
     :param string verification_code: Code generated through the key and the timestamp.
+    :param dict device_data: Info from the client cookie to bypass verification code.
     """
 
     _method_parameters = [
@@ -37,7 +38,7 @@ class TwoFactorMethod(v3.PasswordMethod):
         'user_domain_id',
         'user_domain_name',
         'password',
-        'verification_code',
+        'verification_code'
     ]
 
 
@@ -59,7 +60,7 @@ class TwoFactor(v3.Password):
         options = super(TwoFactor, cls).get_options()
 
         options.extend([
-            cfg.StrOpt('verification-code', help='Generated code by timestamp'),
+            cfg.StrOpt('verification-code', help='Generated code by timestamp')
         ])
 
         return options
