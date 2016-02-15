@@ -38,7 +38,8 @@ class TwoFactorMethod(v3.PasswordMethod):
         'user_domain_id',
         'user_domain_name',
         'password',
-        'verification_code'
+        'verification_code',
+        'device_data'
     ]
 
 
@@ -47,6 +48,8 @@ class TwoFactorMethod(v3.PasswordMethod):
 
         if self.verification_code:
             payload['user']['verification_code'] = self.verification_code
+        if self.device_data:
+            payload['user']['device_data'] = self.device_data
 
         return method, payload
 
@@ -60,7 +63,8 @@ class TwoFactor(v3.Password):
         options = super(TwoFactor, cls).get_options()
 
         options.extend([
-            cfg.StrOpt('verification-code', help='Generated code by timestamp')
+            cfg.StrOpt('verification-code', help='Generated code by timestamp'),
+            cfg.DictOpt('device_data', help='Cached device data')
         ])
 
         return options

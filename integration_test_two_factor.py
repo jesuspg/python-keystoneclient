@@ -35,8 +35,8 @@ def enable_two_factor(keystone, user):
     print "Created key for example_user: ", key.two_factor_key
     return key
 
-def remember_device(keystone, user):
-    device_data = keystone.two_factor.keys.remember_device(user=user.id)
+def remember_device(keystone, **kwargs):
+    device_data = keystone.two_factor.keys.remember_device(**kwargs)
     print "Remembering device for example_user: ", device_data.device_id
     return device_data
 
@@ -46,7 +46,7 @@ def authenticate(keystone, user, password, key=None, use_device_cookie=False, us
             print "Two factor is enabled for example_user!"
 
             if use_device_cookie:
-                device_data = remember_device(keystone, user)
+                device_data = remember_device(keystone=keystone, user_name=user.name, domain_id=user.domain_id)
                 keystone2 = fiwareclient(session=two_factor_session(user=user.id,
                                                                     password=password,
                                                                     device_data={'device_id': device_data.device_id,

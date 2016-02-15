@@ -70,14 +70,14 @@ class UsersTests(utils.TestCase):
         self.manager.check_activated_two_factor(user_id=user_id)
 
     def test_check_activated_two_factor_with_name_and_domain(self):
-        username = uuid.uuid4().hex
+        user_name = uuid.uuid4().hex
         domain_id = uuid.uuid4().hex
 
         self.stub_url('HEAD',
                       [self.path_prefix, '/two_factor_auth'],
                       status_code=204)
 
-        self.manager.check_activated_two_factor(username=username, domain_id=domain_id)
+        self.manager.check_activated_two_factor(user_name=user_name, domain_id=domain_id)
 
     def test_get_two_factor_data(self):
         user_id = uuid.uuid4().hex
@@ -105,7 +105,7 @@ class UsersTests(utils.TestCase):
                                              security_answer="Sample answer")
 
     def test_remember_device(self):
-        username = uuid.uuid4().hex
+        user_name = uuid.uuid4().hex
         domain_name = uuid.uuid4().hex
         user_id = uuid.uuid4().hex
         device_id = uuid.uuid4().hex
@@ -123,7 +123,7 @@ class UsersTests(utils.TestCase):
                       json=key_ref,
                       status_code=201)
 
-        self.manager.remember_device(username=username, domain_name=domain_name)
+        self.manager.remember_device(user_name=user_name, domain_name=domain_name)
 
     def test_delete_all_devices(self):
         user_id = uuid.uuid4().hex
@@ -213,6 +213,56 @@ class TwoFactorAuthTests(utils.TestCase):
                     "password": {
                         'user': {
                             'verification_code': verification_code,
+                            'password': password,
+                            'id': user_id
+                        }
+                    }
+                }
+            }
+        }
+
+        self.assertRequestBodyIs(json=TWO_FACTOR_REQUEST_BODY)
+
+    def test_two_factor_device_authenticate_success(self):
+        password = uuid.uuid4().hex
+        user_id = uuid.uuid4().hex
+
+        device_id = uuid.uuid4().hex
+        device_token = uuid.uuid4().hex
+
+        # Just use an existing project scoped token and change
+        # the methods to password, and add its section.
+        token = client_fixtures.unscoped_token()
+
+        token['methods'] = ["password"]
+        token['password'] = {
+            "device_data": { "device_id": device_id, 
+                             "device_token": device_token,
+                             "user_id": user_id},
+            'password': password
+        }
+        self.stub_auth(json=token)
+
+        a = auth.TwoFactor(
+            self.TEST_URL,
+            device_data={ "device_id": device_id, 
+                          "device_token": device_token,
+                          "user_id": user_id},
+            password=password,
+            user_id=user_id)
+        s = session.Session(auth=a)
+        t = s.get_token()
+        self.assertEqual(self.TEST_TOKEN, t)
+
+        TWO_FACTOR_REQUEST_BODY = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        'user': {
+                            "device_data": { "device_id": device_id, 
+                                             "device_token": device_token,
+                                             "user_id": user_id},
                             'password': password,
                             'id': user_id
                         }

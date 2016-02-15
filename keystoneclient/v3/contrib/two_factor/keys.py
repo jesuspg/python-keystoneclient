@@ -13,6 +13,8 @@
 # limitations under the License.
 import logging
 
+import urllib
+
 from keystoneclient import base
 
 
@@ -67,14 +69,9 @@ class KeyManager(base.Manager):
     def deactivate_two_factor(self, user):
         return super(KeyManager, self)._delete(url=self._auth_url(user))
 
-    def check_activated_two_factor(self, user_id=None, username=None, domain_id=None, domain_name=None):
+    def check_activated_two_factor(self, **kwargs):
         try:
-            if user_id:
-                super(KeyManager, self)._head(url=self._check_base_url()+'?user_id='+user_id)
-            elif domain_id:
-                super(KeyManager, self)._head(url=self._check_base_url()+'?user_name='+username+'&domain_id='+domain_id)
-            elif domain_name:
-                super(KeyManager, self)._head(url=self._check_base_url()+'?user_name='+username+'&domain_name='+domain_name)
+            super(KeyManager, self)._head(url=self._check_base_url() + '?' + urllib.urlencode(kwargs))
             return True
         except:
             return False
@@ -91,9 +88,9 @@ class KeyManager(base.Manager):
         return super(KeyManager, self)._head(body=data,
                                             url=self._security_question_url(user))
 
-    def remember_device(self, username, domain_name):
+    def remember_device(self, **kwargs):
         return super(KeyManager, self)._post(body={},
-                                             url=EXTENSION_PATH+'/devices?user_name='+username+'&domain_name='+domain_name,
+                                             url=EXTENSION_PATH+'/devices?' + urllib.urlencode(kwargs),
                                              response_key="two_factor_auth")
 
     def delete_all_devices(self, user):
