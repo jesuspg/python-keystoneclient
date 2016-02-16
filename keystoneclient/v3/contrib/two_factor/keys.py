@@ -97,4 +97,4 @@ class KeyManager(base.Manager):
         return super(KeyManager, self)._delete(url=self._devices_url(user))
 
     def check_for_device(self, user_id, device_id, device_token):
-        return super(KeyManager, self)._get(url=EXTENSION_PATH+'/devices?user_id='+user_id+'?device_id='+device_id+'?device_token='+device_token)
+        return super(KeyManager, self)._head(url=EXTENSION_PATH+'/devices?user_id='+user_id+'&device_id='+device_id+'?device_token='+device_token)
