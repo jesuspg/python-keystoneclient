@@ -114,8 +114,7 @@ class UsersTests(utils.TestCase):
         key_ref = {
             'two_factor_auth': {
                 'device_id': device_id,
-                'device_token': device_token,
-                'user_id': user_id
+                'device_token': device_token
             }
         }
         self.stub_url('POST',
@@ -237,8 +236,7 @@ class TwoFactorAuthTests(utils.TestCase):
         token['methods'] = ["password"]
         token['password'] = {
             "device_data": { "device_id": device_id, 
-                             "device_token": device_token,
-                             "user_id": user_id},
+                             "device_token": device_token},
             'password': password
         }
         self.stub_auth(json=token)
@@ -246,8 +244,7 @@ class TwoFactorAuthTests(utils.TestCase):
         a = auth.TwoFactor(
             self.TEST_URL,
             device_data={ "device_id": device_id, 
-                          "device_token": device_token,
-                          "user_id": user_id},
+                          "device_token": device_token},
             password=password,
             user_id=user_id)
         s = session.Session(auth=a)
@@ -261,8 +258,7 @@ class TwoFactorAuthTests(utils.TestCase):
                     "password": {
                         'user': {
                             "device_data": { "device_id": device_id, 
-                                             "device_token": device_token,
-                                             "user_id": user_id},
+                                             "device_token": device_token},
                             'password': password,
                             'id': user_id
                         }

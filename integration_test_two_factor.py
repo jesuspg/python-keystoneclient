@@ -50,8 +50,7 @@ def authenticate(keystone, user, password, key=None, use_device_cookie=False, us
                 keystone2 = fiwareclient(session=two_factor_session(user=user.id,
                                                                     password=password,
                                                                     device_data={'device_id': device_data.device_id,
-                                                                                 'device_token': device_data.device_token,
-                                                                                  'user_id': device_data.user_id}))
+                                                                                 'device_token': device_data.device_token}))
                 used_device_message = ' (remembering device)'
             else:
                 code = pyotp.TOTP(key.two_factor_key).now()

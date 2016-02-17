@@ -90,11 +90,11 @@ class KeyManager(base.Manager):
 
     def remember_device(self, **kwargs):
         return super(KeyManager, self)._post(body={},
-                                             url=EXTENSION_PATH+'/devices?' + urllib.urlencode(kwargs),
+                                             url=EXTENSION_PATH+'/devices?'+urllib.urlencode(kwargs),
                                              response_key="two_factor_auth")
 
     def delete_all_devices(self, user):
         return super(KeyManager, self)._delete(url=self._devices_url(user))
 
-    def check_for_device(self, user_id, device_id, device_token):
-        return super(KeyManager, self)._head(url=EXTENSION_PATH+'/devices?user_id='+user_id+'&device_id='+device_id+'?device_token='+device_token)
+    def check_for_device(self, **kwargs):
+        return super(KeyManager, self)._head(url=EXTENSION_PATH+'/devices?'+urllib.urlencode(kwargs))
