@@ -17,15 +17,16 @@ def fiwareclient(session=None, request=None):# TODO(garcianavalon) use this
     # TODO(garcianavalon) find a way to integrate this with the existng keystone api
     # TODO(garcianavalon)caching and efficiency with the client object.
     if not session:
-        session = two_factor_session(user='idm', password='idm')
+        session = two_factor_session(user='idm_user', password='idm')
     keystone = client.Client(session=session)
     return keystone
 
-def two_factor_session(user, password, verification_code=None, domain_id='default'):
+def two_factor_session(user, password, verification_code=None, device_data=None, domain_id='default'):
     auth_object = auth.TwoFactor(auth_url=url,
                                  user_id=user,
                                  password=password,
                                  user_domain_id=domain_id,
+                                 device_data=device_data,
                                  verification_code=verification_code)
     return session.Session(auth=auth_object)
 
@@ -34,20 +35,35 @@ def enable_two_factor(keystone, user):
     print "Created key for example_user: ", key.two_factor_key
     return key
 
-def authenticate(keystone, user, password, key=None, use_two_factor=True):
+def remember_device(keystone, **kwargs):
+    device_data = keystone.two_factor.keys.remember_device(**kwargs)
+    print "Remembering device for example_user: ", device_data.device_id
+    return device_data
+
+def authenticate(keystone, user, password, key=None, use_device_cookie=False, use_two_factor=True):
     if use_two_factor:
         if keystone.two_factor.keys.check_activated_two_factor(user_id=user.id):
             print "Two factor is enabled for example_user!"
-            code = pyotp.TOTP(key.two_factor_key).now()
-            print code
-            keystone2 = fiwareclient(session=two_factor_session(user=user.id,
-                                                                password=password,
-                                                                verification_code=code))
+
+            if use_device_cookie:
+                device_data = remember_device(keystone=keystone, user_name=user.name, domain_id=user.domain_id)
+                keystone2 = fiwareclient(session=two_factor_session(user=user.id,
+                                                                    password=password,
+                                                                    device_data={'device_id': device_data.device_id,
+                                                                                 'device_token': device_data.device_token}))
+                used_device_message = ' (remembering device)'
+            else:
+                code = pyotp.TOTP(key.two_factor_key).now()
+                print code
+                keystone2 = fiwareclient(session=two_factor_session(user=user.id,
+                                                                    password=password,
+                                                                    verification_code=code))
+                used_device_message = ''
             try:
                 keystone2.users.get(user.id)
-                print "Auth with two factor worked"
+                print "Auth with two factor{used_device} worked".format(used_device=used_device_message)
             except:
-                print "Auth with two factor didn't work"
+                print "Auth with two factor{used_device} didn't work".format(used_device=used_device_message)
         else:
             print "Two factor is disabled for exampleuser!"
     else:
@@ -78,6 +94,7 @@ def main():
     # Run tests
     key = enable_two_factor(keystone, user)
     authenticate(keystone, user, password="example_user", key=key, use_two_factor=True)
+    authenticate(keystone, user, password="example_user", key=key, use_two_factor=True, use_device_cookie=True)
     disable_two_factor(keystone, user)
     authenticate(keystone, user, password="example_user", use_two_factor=False)
 
